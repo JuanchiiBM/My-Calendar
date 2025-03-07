@@ -66,7 +66,7 @@ const ColorPicker: React.FC<ColorPickerProps> = ({ color, onChange }) => {
   };
 
   return (
-    <div>
+    <div className='w-full'>
       <div style={styles.swatch} onClick={handleClick}>
         Elija un color:
         <div style={styles.color} />

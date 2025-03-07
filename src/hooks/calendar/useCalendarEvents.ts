@@ -6,7 +6,13 @@ const useCalendarEvents = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [editingEventId, setEditingEventId] = useState<string | null>(null);
-    const [newEventData, setNewEventData] = useState({
+    const [newEventData, setNewEventData] = useState<{
+        title: string,
+        start: string,
+        end: string,
+        color: string,
+        description: string
+    }>({
         title: "",
         start: "",
         end: "",
@@ -28,11 +34,14 @@ const useCalendarEvents = () => {
 
     const handleDateClick = (info: any) => {
         setIsEditing(false);
+        const now = new Date();
+        const argentinaTime = new Date(now.getTime() - now.getTimezoneOffset() * 60000 - 0 * 3600000);
+
         setNewEventData({
             title: "",
             description: "",
-            start: `${info.dateStr}T00:00`,
-            end: `${info.dateStr}T01:00`,
+            start: `${info.dateStr}T${argentinaTime.toISOString().split('T')[1].slice(0, 5)}`,
+            end: `${info.dateStr}T${new Date(argentinaTime.getTime() + 30 * 60000).toISOString().split('T')[1].slice(0, 5)}`,
             color: "#3788d8"
         });
         setIsModalOpen(true);
@@ -41,11 +50,13 @@ const useCalendarEvents = () => {
     const handleCreateEventClick = () => {
         setIsEditing(false);
         const now = new Date();
+        const argentinaTime = new Date(now.getTime() - now.getTimezoneOffset() * 60000 - 0 * 3600000);
+
         setNewEventData({
             title: "",
             description: "",
-            start: now.toISOString().slice(0, 16),
-            end: now.toISOString().slice(0, 16),
+            start: argentinaTime.toISOString().slice(0, 16),
+            end: new Date(argentinaTime.getTime() + 30 * 60000).toISOString().slice(0, 16),
             color: "#3788d8"
         });
         setIsModalOpen(true);
@@ -55,6 +66,8 @@ const useCalendarEvents = () => {
         setEditingEventId(info.event.id);
         setIsEditing(true);
         setIsModalOpen(true);
+        console.log(info.event.startStr)
+        console.log(info.event.startStr.slice(0, 16))
         setNewEventData({
             title: info.event.title,
             description: info.event.extendedProps.description || "",

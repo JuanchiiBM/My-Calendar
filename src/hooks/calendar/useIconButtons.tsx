@@ -1,20 +1,22 @@
 import { useEffect } from "react";
-import { createRoot } from "react-dom/client";
+import { createRoot, Root } from "react-dom/client";
 import {Icon} from "@iconify/react";
+
+let addButtonRoot: Root
 
 const useIconButtons = () => {
     useEffect(() => {
+        const addButton = document.getElementsByClassName("fc-addEventButton-button")[0];    
+        addButtonRoot = createRoot(addButton)
+    }, [])
+
+    useEffect(() => {
         const addButton = document.getElementsByClassName("fc-addEventButton-button")[0];
-        const listButton = document.getElementsByClassName("fc-listWeek-button")[0];
-
-        if (addButton && listButton) {
-            createRoot(addButton).render(<Icon icon={"mingcute:calendar-add-fill"} />);
-            createRoot(listButton).render(<Icon icon={"mingcute:calendar-2-fill"} />);
-
+        if (addButton) {
+            addButtonRoot.render(<Icon icon={"mingcute:calendar-add-fill"} />);
             addButton.setAttribute("title", "Agregar evento");
-            listButton.setAttribute("title", "Vista de la lista de eventos");
         }
-    }, []);
+    }, [document.body.parentElement?.className]);
 };
 
 export default useIconButtons;
