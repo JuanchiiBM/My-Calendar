@@ -1,18 +1,13 @@
+import React from "react";
 import {Button, Divider, Form, Input, Link} from "@heroui/react";
 import {Icon} from "@iconify/react";
-import {useTheme} from "@heroui/use-theme";
-import React from "react";
+import useThemeToggle from "@/hooks/useThemeToggle";
 
 const AuthLogin = () => {
-    const {theme, setTheme} = useTheme();
+    const {theme, toggleTheme} = useThemeToggle();
     const [isVisible, setIsVisible] = React.useState(false);
 
     const toggleVisibility = () => setIsVisible(!isVisible);
-
-    const toggleTheme = () => {
-        setTheme(theme === "light" ? "dark" : "light");
-    };
-
 
     const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
