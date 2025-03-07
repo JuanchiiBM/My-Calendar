@@ -1,0 +1,78 @@
+:root {
+    --fc-list-event-hover-bg-color: hsl(var(--heroui-background)) !important;
+}
+
+.fc-theme-standard td,
+.fc-theme-standard th {
+    border: 1px solid hsl(var(--heroui-default-600)) !important
+}
+
+.fc-button {
+    background-color: hsl(var(--heroui-secondary)) !important;
+    transition: 0.25s background-color ease-in-out;
+    border: 1px solid hsl(var(--heroui-secondary)) !important;
+
+    &:hover {
+        background-color: hsl(var(--heroui-secondary-400)) !important;
+        transition: 0.25s background-color ease-in-out;
+    }
+}
+
+.fc-col-header {
+    background-color: hsl(var(--heroui-default-200));
+    color: hsl(var(--heroui-default-600));
+}
+
+.fc-scroller {
+    background-color: hsl(var(--heroui-default-100));
+}
+
+.fc-scrollgrid-section-header {
+    border-radius: 10px 10px 0px 0px;
+
+    th {
+        border-radius: 10px 10px 0px 0px;
+
+        .fc-scroller-harness {
+            border-radius: 10px 10px 0px 0px;
+        }
+    }
+}
+
+.fc-scrollgrid-section-body {
+    border-radius: 0px 0px 10px 10px;
+
+    td {
+        border-radius: 0px 0px 10px 10px;
+
+        .fc-scroller-harness {
+            border-radius: 0px 0px 10px 10px; 
+        }
+    }
+}
+
+.fc-popover {
+    background-color: hsl(var(--heroui-background)) !important;
+}
+
+.fc-toolbar-title {
+    font-size: 25px !important;
+}
+
+.fc-view {
+    background-color: hsl(var(--heroui-background-100)) !important;
+    border-radius: 15px;
+}
+
+.fc-list-event {
+    background-color: hsl(var(--heroui-background-100)) !important;
+}
+
+.fc-list-event-graphic {
+    padding: 2px 2px !important;
+    padding-right: 2px !important;
+}
+
+.fc-list-day-cushion {
+    background-color: hsl(var(--heroui-background-100)) !important;
+}
