@@ -2,17 +2,17 @@ import React from "react";
 import {Button, Divider, Form, Input, Link} from "@heroui/react";
 import {Icon} from "@iconify/react";
 import useThemeToggle from "@/hooks/useThemeToggle";
+import useHandleSubmit from "@/hooks/useHandleSubmit";
 
 const AuthLogin = () => {
     const {theme, toggleTheme} = useThemeToggle();
     const [isVisible, setIsVisible] = React.useState(false);
-
     const toggleVisibility = () => setIsVisible(!isVisible);
+    const handleSubmit = useHandleSubmit()
 
-    const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    console.log("Login submitted");
-    };
+    const redirectToCalendar = () => {
+        window.location.href = "/calendar";
+    }
 
     return (
         <main className="bg-background flex min-h-screen items-center justify-center p-4">
@@ -29,12 +29,12 @@ const AuthLogin = () => {
                 />
                 </Button>
                 <h2 className="text-xl font-medium">Calendario</h2>
-                <Form className="flex flex-col gap-3" onSubmit={handleSubmit}>
+                <Form className="flex flex-col gap-3" onSubmit={(e) => handleSubmit(e, '/api/users', {error: 'Error al iniciar sesión', success: 'Inicio exitoso'}, redirectToCalendar)}>
                     <Input
                         label="Usuario"
                         labelPlacement="inside"
                         placeholder="Ingrese su nombre de usuario"
-                        name="user"
+                        name="name"
                         type="text"
                         variant="bordered"
                     />

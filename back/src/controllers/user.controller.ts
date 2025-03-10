@@ -35,3 +35,16 @@ export const createUser = async (name: string, password: string): Promise<User> 
         throw new Error("Error al crear usuario");
     }
 };
+
+export const loginUser = async (name: string, password: string): Promise<User | null> => {
+    try {
+        const result = await client.queryObject<User>(
+            `SELECT * FROM "User" WHERE name = $1 AND password = $2 LIMIT 1`,
+            [name, password]
+        );
+        return result.rows.length > 0 ? result.rows[0] : null;
+    } catch (error) {
+        console.error("Error iniciando sesión", error);
+        throw new Error("Error al iniciar sesión");
+    }
+};
