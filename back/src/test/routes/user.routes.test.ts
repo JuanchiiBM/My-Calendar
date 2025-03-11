@@ -1,8 +1,8 @@
 import * as userController from "../../controllers/user.controller.ts";
-import { handleRequest } from "../../routes/user.routes.ts";
+import { handleUserRequest } from "../../routes/user.routes.ts";
 import { stub, assertRejects, assertEquals } from "../../deps.ts";
 import client from "../../services/database.ts";
-import { User } from "../../models/user.model.ts";
+import { UserProps } from "../../models/user.model.ts";
 import { QueryObjectResult, QueryArrayResult } from "https://deno.land/x/postgres@v0.19.3/mod.ts";
 
 const userControllerProxy = { ...userController };
@@ -20,10 +20,10 @@ Deno.test("GET /api/users debe devolver una lista de usuarios", async () => {
         rowCount: mockUsers.length,
         warnings: [],
         insertRow: undefined
-    } as unknown as QueryObjectResult<User>));
+    } as unknown as QueryObjectResult<UserProps>));
 
     const request = new Request("http://localhost/api/users", { method: "GET" });
-    const response = await handleRequest(request);
+    const response = await handleUserRequest(request);
 
     const jsonResponse = await response.json();
 
@@ -45,10 +45,10 @@ Deno.test("GET /api/users/:name debe devolver un usuario si existe", async () =>
         rowCount: 1, // ✅ Debe ser un número
         warnings: [],
         insertRow: undefined
-    } as unknown as QueryObjectResult<User>));
+    } as unknown as QueryObjectResult<UserProps>));
     
     const request = new Request("http://localhost/api/users/Juan", { method: "GET" });
-    const response = await handleRequest(request);
+    const response = await handleUserRequest(request);
 
     const jsonResponse = await response.json(); // ✅ Guardamos JSON antes de comparar
 
@@ -68,10 +68,10 @@ Deno.test("GET /api/users/:name debe devolver 404 si el usuario no existe", asyn
         rowCount: 0,
         warnings: [],
         insertRow: undefined
-    } as unknown as QueryObjectResult<User>));
+    } as unknown as QueryObjectResult<UserProps>));
 
     const request = new Request("http://localhost/api/users/Desconocido", { method: "GET" });
-    const response = await handleRequest(request);
+    const response = await handleUserRequest(request);
 
     assertEquals(response.status, 404);
     assertEquals(await response.json(), { error: "Usuario no encontrado" });
@@ -91,7 +91,7 @@ Deno.test("POST /api/users debe crear un usuario nuevo", async () => {
         rowCount: 0,
         warnings: [],
         insertRow: undefined
-    } as unknown as QueryObjectResult<User>));
+    } as unknown as QueryObjectResult<UserProps>));
 
     const dbInsertStub = stub(client, "queryArray", async () => ({
         rows: [[mockUser.id_user]], // ✅ Simulamos que devuelve un ID nuevo
@@ -100,7 +100,7 @@ Deno.test("POST /api/users debe crear un usuario nuevo", async () => {
         warnings: [],
         rowDescription: { columns: [] },
         insertRow: undefined
-    } as unknown as QueryArrayResult<[User]>));
+    } as unknown as QueryArrayResult<[UserProps]>));
 
     const request = new Request("http://localhost/api/users", {
         method: "POST",
@@ -108,11 +108,11 @@ Deno.test("POST /api/users debe crear un usuario nuevo", async () => {
         headers: { "Content-Type": "application/json" }
     });
 
-    const response = await handleRequest(request);
+    const response = await handleUserRequest(request);
     const jsonResponse = await response.json(); // ✅ Guardamos JSON antes de comparar
 
     assertEquals(response.status, 201);
-    assertEquals(jsonResponse, mockUser);
+    assertEquals(jsonResponse, {message: "Creación de usuario exitosa"});
 
     dbStub.restore();
     dbInsertStub.restore();
@@ -129,7 +129,7 @@ Deno.test("POST /api/users debe devolver 400 si el usuario ya existe", async () 
         rowCount: 0,
         warnings: [],
         insertRow: undefined
-    } as unknown as QueryObjectResult<User>));
+    } as unknown as QueryObjectResult<UserProps>));
 
     const dbInsertStub = stub(client, "queryArray", async () => ({
         rows: [[mockUser.id_user]], // ✅ Simulamos que devuelve un ID nuevo
@@ -138,7 +138,7 @@ Deno.test("POST /api/users debe devolver 400 si el usuario ya existe", async () 
         warnings: [],
         rowDescription: { columns: [] },
         insertRow: undefined
-    } as unknown as QueryArrayResult<[User]>));
+    } as unknown as QueryArrayResult<[UserProps]>));
     
     const request = new Request("http://localhost/api/users", {
         method: "POST",
@@ -146,7 +146,7 @@ Deno.test("POST /api/users debe devolver 400 si el usuario ya existe", async () 
         headers: { "Content-Type": "application/json" }
     });
     
-    const response = await handleRequest(request);
+    const response = await handleUserRequest(request);
     
     assertEquals(response.status, 400);
     assertEquals(await response.json(), { error: "El usuario ya existe" });

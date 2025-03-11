@@ -12,7 +12,7 @@ const corsHeaders = {
 };
 
 // 🔥 Manejar solicitudes OPTIONS (Preflight)
-export const handleRequest = async (req: Request): Promise<Response> => {
+export const handleUserRequest = async (req: Request): Promise<Response> => {
   try {
     const url = new URL(req.url);
 

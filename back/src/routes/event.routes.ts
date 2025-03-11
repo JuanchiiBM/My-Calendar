@@ -1,0 +1,90 @@
+import { createEvent, getEvents } from "../controllers/event.controller.ts";
+import { getUserByName } from "../controllers/user.controller.ts";
+
+export const handleEventRequest = async (req: Request): Promise<Response> => {
+  try {
+    const url = new URL(req.url);
+
+    //_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-
+    // GET /api/events
+    //_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-
+    if (req.method === "GET" && url.pathname === "/api/events") {
+      const events = await getEvents();
+      return new Response(JSON.stringify(events), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
+    //_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-
+    // POST /api/events
+    //_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-
+    if (req.method === "POST" && url.pathname === "/api/events") {
+      const data = await req.json();
+
+      // 🔹 Validar datos requeridos
+      if (
+        !data.title || !data.start_date || !data.end_date ||
+        !data.category_id || !data.created_by
+      ) {
+        return new Response(
+          JSON.stringify({ error: "Faltan datos obligatorios" }),
+          {
+            status: 400,
+            headers: { "Content-Type": "application/json" },
+          },
+        );
+      }
+
+      // 🔹 guests es opcional -> Convertimos nombres en IDs si existen
+      let guests: number[] = [];
+      if (data.guests && Array.isArray(data.guests)) {
+        for (const guestName of data.guests) {
+          const guest = await getUserByName(guestName);
+          if (!guest) {
+            return new Response(
+              JSON.stringify({
+                error: "Alguno de los invitados no es un usuario",
+              }),
+              {
+                status: 400,
+                headers: { "Content-Type": "application/json" },
+              },
+            );
+          }
+          if (guest.id_user)
+          guests.push(guest.id_user);
+        }
+      }
+
+      // 🔹 Llamar al controller con los datos convertidos
+      const event = await createEvent(
+        data.title,
+        data.description || "",
+        data.start_date,
+        data.end_date,
+        data.category_id,
+        data.created_by,
+        guests,
+      );
+
+      return new Response(JSON.stringify(event), {
+        status: 201,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
+    return new Response(JSON.stringify({ error: "Ruta no encontrada" }), {
+      status: 404,
+      headers: { "Content-Type": "application/json" },
+    });
+  } catch (error: any) {
+    return new Response(
+      JSON.stringify({ error: `Error en el servidor: ${error.message}` }),
+      {
+        status: 500,
+        headers: { "Content-Type": "application/json" },
+      },
+    );
+  }
+};

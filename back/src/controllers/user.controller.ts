@@ -1,9 +1,9 @@
 import client from "../services/database.ts";
-import { User } from "../models/user.model.ts";
+import { UserProps } from "../models/user.model.ts";
 
-export const getUsers = async (): Promise<User[]> => {
+export const getUsers = async (): Promise<UserProps[]> => {
     try {
-        const result = await client.queryObject<User>("SELECT * FROM \"User\"");
+        const result = await client.queryObject<UserProps>("SELECT * FROM \"User\"");
         return result.rows;
     } catch (error) {
         console.error("Error obteniendo usuarios", error);
@@ -11,9 +11,9 @@ export const getUsers = async (): Promise<User[]> => {
     }
 };
 
-export const getUserByName = async (name: string): Promise<User | null> => {
+export const getUserByName = async (name: string): Promise<UserProps | null> => {
     try {
-        const result = await client.queryObject<User>(
+        const result = await client.queryObject<UserProps>(
             `SELECT * FROM "User" WHERE name = $1 LIMIT 1`,
             [name]
         );
@@ -24,7 +24,7 @@ export const getUserByName = async (name: string): Promise<User | null> => {
     }
 };
 
-export const createUser = async (name: string, password: string): Promise<User> => {
+export const createUser = async (name: string, password: string): Promise<UserProps> => {
     try {
         const result = await client.queryArray<[number]>(
             `SELECT ensure_user_exists('${name}', '${password}')`
@@ -36,9 +36,9 @@ export const createUser = async (name: string, password: string): Promise<User> 
     }
 };
 
-export const loginUser = async (name: string, password: string): Promise<User | null> => {
+export const loginUser = async (name: string, password: string): Promise<UserProps | null> => {
     try {
-        const result = await client.queryObject<User>(
+        const result = await client.queryObject<UserProps>(
             `SELECT * FROM "User" WHERE name = $1 AND password = $2 LIMIT 1`,
             [name, password]
         );
