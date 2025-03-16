@@ -5,8 +5,6 @@ import client from "../../services/database.ts";
 import { UserProps } from "../../models/user.model.ts";
 import { QueryObjectResult, QueryArrayResult } from "https://deno.land/x/postgres@v0.19.3/mod.ts";
 
-const userControllerProxy = { ...userController };
-
 Deno.test("GET /api/users debe devolver una lista de usuarios", async () => {
     const mockUsers = [
         { id_user: 1, name: "Juan", password: "1234" },

@@ -4,12 +4,7 @@ import {
   getUsers,
   loginUser,
 } from "../controllers/user.controller.ts";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*", // Permitir todas las solicitudes
-  "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS", // Métodos permitidos
-  "Access-Control-Allow-Headers": "Content-Type, Authorization", // Headers permitidos
-};
+import { corsHeaders } from "../deps.ts";
 
 // 🔥 Manejar solicitudes OPTIONS (Preflight)
 export const handleUserRequest = async (req: Request): Promise<Response> => {

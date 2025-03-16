@@ -1,10 +1,15 @@
 import { createEvent, getEvents } from "../controllers/event.controller.ts";
 import { getUserByName } from "../controllers/user.controller.ts";
+import { corsHeaders } from "../deps.ts";
+
 
 export const handleEventRequest = async (req: Request): Promise<Response> => {
   try {
     const url = new URL(req.url);
 
+    if (req.method === "OPTIONS") {
+        return new Response(null, { status: 204, headers: corsHeaders });
+    }
     //_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-
     // GET /api/events
     //_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-
@@ -12,7 +17,7 @@ export const handleEventRequest = async (req: Request): Promise<Response> => {
       const events = await getEvents();
       return new Response(JSON.stringify(events), {
         status: 200,
-        headers: { "Content-Type": "application/json" },
+        headers: corsHeaders,
       });
     }
 
@@ -31,7 +36,7 @@ export const handleEventRequest = async (req: Request): Promise<Response> => {
           JSON.stringify({ error: "Faltan datos obligatorios" }),
           {
             status: 400,
-            headers: { "Content-Type": "application/json" },
+            headers: corsHeaders,
           },
         );
       }
@@ -48,7 +53,7 @@ export const handleEventRequest = async (req: Request): Promise<Response> => {
               }),
               {
                 status: 400,
-                headers: { "Content-Type": "application/json" },
+                headers: corsHeaders,
               },
             );
           }
@@ -70,20 +75,20 @@ export const handleEventRequest = async (req: Request): Promise<Response> => {
 
       return new Response(JSON.stringify(event), {
         status: 201,
-        headers: { "Content-Type": "application/json" },
+        headers: corsHeaders,
       });
     }
 
     return new Response(JSON.stringify({ error: "Ruta no encontrada" }), {
       status: 404,
-      headers: { "Content-Type": "application/json" },
+      headers: corsHeaders,
     });
   } catch (error: any) {
     return new Response(
-      JSON.stringify({ error: `Error en el servidor: ${error.message}` }),
+      JSON.stringify({ error: `${error.message}` }),
       {
         status: 500,
-        headers: { "Content-Type": "application/json" },
+        headers: corsHeaders,
       },
     );
   }

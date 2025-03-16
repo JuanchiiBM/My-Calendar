@@ -1,4 +1,5 @@
 import { handleUserRequest } from "./src/routes/user.routes.ts";
+import { handleCategoryRequest } from "./src/routes/category.routes.ts";
 import { handleEventRequest } from "./src/routes/event.routes.ts";
 import { connectDB } from "./src/services/database.ts";
 
@@ -18,6 +19,11 @@ const handleRequest = async (req: Request): Promise<Response> => {
     // 🔹 Rutas de eventos
     if (url.pathname.startsWith("/api/events")) {
         return handleEventRequest(req);
+    }
+
+    // 🔹 Rutas de categorías
+    if (url.pathname.startsWith("/api/categorys")) {
+        return handleCategoryRequest(req);
     }
 
     // 🔹 Si la ruta no coincide con ninguna

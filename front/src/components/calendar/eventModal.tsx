@@ -1,13 +1,17 @@
 import React from "react";
-import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Input, DatePicker, Form } from "@heroui/react";
+import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Input, DatePicker, Form, Autocomplete, AutocompleteItem } from "@heroui/react";
 import ColorPicker from "../colorPicker";
 import TextArea from "../textArea";
 import { EventModalProps } from "@/types/calendar/eventModal";
 import { I18nProvider } from "@react-aria/i18n";
 import useFormatDateForPicker from "@/hooks/useFormatDateForPicker";
 import errors from "@/config/eventModalErrors";
+import useSetCategorys from "@/hooks/calendar/useSetCategorys";
+import { Icon } from "@iconify/react/dist/iconify.js";
+
 const EventModal: React.FC<EventModalProps> = ({ isModalOpen, setIsModalOpen, isEditing, newEventData, setNewEventData, handleSaveEvent, handleDeleteEvent }) => {
     const { formatDateForPicker } = useFormatDateForPicker()
+    const categorys = useSetCategorys()
 
     return (
         <I18nProvider locale="es">
@@ -52,7 +56,20 @@ const EventModal: React.FC<EventModalProps> = ({ isModalOpen, setIsModalOpen, is
                                     }}
                                 />
                             </div>
-                            <ColorPicker color={newEventData.color} onChange={(color) => setNewEventData({ ...newEventData, color })} />
+                            <Autocomplete 
+                                defaultSelectedKey={'Sin Asignar'} 
+                                className="w-full" 
+                                label="Selecciona una categoria"
+                                startContent={<Icon icon="material-symbols:circle" style={{color: '#444444'}} />}>
+                                    {categorys.map((category) => (
+                                    <AutocompleteItem 
+                                        data-color={category.color} 
+                                        data-id={category.id_category} 
+                                        key={category.name}
+                                        startContent={<Icon icon="material-symbols:circle" style={{color: category.color}} />}
+                                    >{category.name}</AutocompleteItem>
+                                    ))}
+                            </Autocomplete>
                         </Form>
                     </ModalBody>
                     <ModalFooter>

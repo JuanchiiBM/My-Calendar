@@ -1,7 +1,7 @@
 import client from "../services/database.ts";
 import { UserProps } from "../models/user.model.ts";
 
-export const getUsers = async (): Promise<UserProps[]> => {
+export async function getUsers(): Promise<UserProps[]> {
     try {
         const result = await client.queryObject<UserProps>("SELECT * FROM \"User\"");
         return result.rows;
@@ -9,7 +9,7 @@ export const getUsers = async (): Promise<UserProps[]> => {
         console.error("Error obteniendo usuarios", error);
         throw new Error("Error al obtener usuarios");
     }
-};
+}
 
 export const getUserByName = async (name: string): Promise<UserProps | null> => {
     try {
