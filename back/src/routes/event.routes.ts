@@ -1,26 +1,30 @@
-import { createEvent, getEvents, getEventsById } from "../controllers/event.controller.ts";
+import {
+  createEvent,
+  getEvents,
+  getEventsById,
+  updateEvent,
+} from "../controllers/event.controller.ts";
 import { getUserByName } from "../controllers/user.controller.ts";
 import { corsHeaders } from "../deps.ts";
-
 
 export const handleEventRequest = async (req: Request): Promise<Response> => {
   try {
     const url = new URL(req.url);
 
     if (req.method === "OPTIONS") {
-        return new Response(null, { status: 204, headers: corsHeaders });
+      return new Response(null, { status: 204, headers: corsHeaders });
     }
 
     //_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-
     // GET /api/events?id
     //_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-
     if (req.method === "GET" && url.pathname.startsWith("/api/events/")) {
-        const id_user = req.url.split('?id=')[1]
-        const events = await getEventsById(id_user);
-        return new Response(JSON.stringify(events), {
-          status: 200,
-          headers: corsHeaders,
-        });
+      const id_user = req.url.split("?id=")[1];
+      const events = await getEventsById(id_user);
+      return new Response(JSON.stringify(events), {
+        status: 200,
+        headers: corsHeaders,
+      });
     }
 
     //_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-
@@ -73,14 +77,14 @@ export const handleEventRequest = async (req: Request): Promise<Response> => {
 
           if (guest.id_user == data.created_by) {
             return new Response(
-                JSON.stringify({
-                  error: "Usted no puede asignarse como invitado",
-                }),
-                {
-                  status: 400,
-                  headers: corsHeaders,
-                },
-              );
+              JSON.stringify({
+                error: "Usted no puede asignarse como invitado",
+              }),
+              {
+                status: 400,
+                headers: corsHeaders,
+              },
+            );
           }
 
           if (data.guests) {
@@ -98,8 +102,9 @@ export const handleEventRequest = async (req: Request): Promise<Response> => {
             }
           }
 
-          if (guest.id_user)
-          guests.push(guest.id_user);
+          if (guest.id_user) {
+            guests.push(guest.id_user);
+          }
         }
       }
 
@@ -114,11 +119,61 @@ export const handleEventRequest = async (req: Request): Promise<Response> => {
         guests,
       );
 
-      return new Response(JSON.stringify({ status: 'ok', message: 'Evento creado'}), {
-        status: 201,
-        headers: corsHeaders,
-      });
+      return new Response(
+        JSON.stringify({ status: "ok", message: "Evento creado" }),
+        {
+          status: 201,
+          headers: corsHeaders,
+        },
+      );
     }
+
+    //_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-
+    // PUT /api/events
+    //_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-
+
+    if (req.method === "PUT" && url.pathname.startsWith("/api/events/")) {
+      const event_id = Number(req.url.split("?event_id=")[1]);
+      const data = await req.json();
+
+      if (!event_id || isNaN(event_id)) {
+        return new Response(
+          JSON.stringify({ error: "ID de evento inválido" }),
+          {
+            status: 400,
+            headers: { "Content-Type": "application/json" },
+          },
+        );
+      }
+
+      if (!data.created_by) {
+        return new Response(JSON.stringify({ error: "Se requiere user_id" }), {
+          status: 400,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+
+      try {
+        const result = await updateEvent(event_id, data.created_by, data.guests);
+
+        return new Response(JSON.stringify(result), {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        });
+      } catch (error: any) {
+        return new Response(
+          JSON.stringify({ error: `Error en el servidor: ${error.message}` }),
+          {
+            status: 500,
+            headers: { "Content-Type": "application/json" },
+          },
+        );
+      }
+    }
+
+    //_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-
+    // DEFAULT ERROR
+    //_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-
 
     return new Response(JSON.stringify({ error: "Ruta no encontrada" }), {
       status: 404,

@@ -19,6 +19,7 @@ const id_user = localStorage.getItem('dataUser')
 
 /*
  - Agregar validacion no - en crear nombre de usuario
+ - Agregar spinner y en vez de usar localstorage usar context (Puta madre)
 */
 
 const Calendar = () => {
