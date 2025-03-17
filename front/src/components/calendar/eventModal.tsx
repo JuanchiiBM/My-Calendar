@@ -6,12 +6,13 @@ import { EventModalProps } from "@/types/calendar/eventModal";
 import { I18nProvider } from "@react-aria/i18n";
 import useFormatDateForPicker from "@/hooks/useFormatDateForPicker";
 import errors from "@/config/eventModalErrors";
-import useSetCategorys from "@/hooks/calendar/useSetCategorys";
+import useSet from "@/hooks/useSet";
 import { Icon } from "@iconify/react/dist/iconify.js";
+import { CategoryProps } from "@/types/categoryModels";
 
 const EventModal: React.FC<EventModalProps> = ({ isModalOpen, setIsModalOpen, isEditing, newEventData, setNewEventData, handleSaveEvent, handleDeleteEvent }) => {
     const { formatDateForPicker } = useFormatDateForPicker()
-    const categorys = useSetCategorys()
+    const categorys: CategoryProps[] = useSet('/api/categorys')
 
     return (
         <I18nProvider locale="es">
@@ -57,19 +58,22 @@ const EventModal: React.FC<EventModalProps> = ({ isModalOpen, setIsModalOpen, is
                                 />
                             </div>
                             <Autocomplete 
-                                defaultSelectedKey={'Sin Asignar'} 
+                                defaultSelectedKey={newEventData.color + '/' + newEventData.category_id} 
                                 className="w-full" 
                                 label="Selecciona una categoria"
-                                startContent={<Icon icon="material-symbols:circle" style={{color: '#444444'}} />}>
+                                onSelectionChange={(option) => {typeof option === 'string' && setNewEventData({ ...newEventData, category_id: parseInt(option.split('/')[1]), color: option.split('/')[0]})}}
+                                startContent={<Icon icon="material-symbols:circle" style={{color: newEventData.color}} />}>
                                     {categorys.map((category) => (
                                     <AutocompleteItem 
-                                        data-color={category.color} 
-                                        data-id={category.id_category} 
-                                        key={category.name}
+                                        key={category.color + '/' + category.id_category}
                                         startContent={<Icon icon="material-symbols:circle" style={{color: category.color}} />}
                                     >{category.name}</AutocompleteItem>
                                     ))}
                             </Autocomplete>
+                            <Input label="Invitados (Separelos con ' - ')"
+                                value={newEventData.name_invited_user && newEventData.name_invited_user.join(' - ')}
+                                onChange={(e) => {console.log(newEventData.name_invited_user)}}
+                            />
                         </Form>
                     </ModalBody>
                     <ModalFooter>

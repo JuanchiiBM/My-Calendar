@@ -15,6 +15,44 @@ export const getEvents = async (): Promise<EventProps[]> => {
     }
 };
 
+export const getEventsById = async (id: string): Promise<EventProps[]> => {
+    try {
+        const result = await client.queryObject<EventProps>(
+            `SELECT e.*, eg.user_id AS invited_user, c.color, u.name AS name_invited_user
+            FROM "Event" e
+            LEFT JOIN "EventGuest" eg ON e.id_event = eg.event_id
+            LEFT JOIN "User" u ON eg.user_id = u.id_user
+            INNER JOIN "Category" c ON e.category_id = c.id_category
+            WHERE e.created_by = $1 OR eg.user_id = $1;`,
+            [id]
+        )
+
+        const eventsMap: { [key: string]: any } = {};
+
+        result.rows.forEach((row: any) => {
+            if (!eventsMap[row.id_event]) {
+            eventsMap[row.id_event] = {
+                ...row,
+                invited_user: row.invited_user ? [row.invited_user] : [],
+                name_invited_user: row.name_invited_user ? [row.name_invited_user] : []
+            };
+            } else {
+            if (row.invited_user) {
+                eventsMap[row.id_event].invited_user.push(row.invited_user);
+            }
+            if (row.name_invited_user) {
+                eventsMap[row.id_event].name_invited_user.push(row.name_invited_user);
+            }
+            }
+        });
+
+        return Object.values(eventsMap);
+    } catch (error) {
+        console.error("Error obteniendo eventos", error);
+        throw new Error("Error al obtener eventos");
+    }
+}
+
 export const createEvent = async (
     title: string,
     description: string,

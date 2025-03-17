@@ -1,3 +1,5 @@
+import { EventMidle } from "../eventModel";
+
 export interface EventModalProps {
     isModalOpen: boolean;
     setIsModalOpen: (open: boolean) => void;
@@ -8,7 +10,7 @@ export interface EventModalProps {
         end: string;
         color: string;
         description: string;
-    };
+    } & EventMidle;
     setNewEventData: React.Dispatch<React.SetStateAction<EventModalProps['newEventData']>>;
     handleSaveEvent: () => void;
     handleDeleteEvent: () => void;

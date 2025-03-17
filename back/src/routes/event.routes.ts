@@ -1,4 +1,4 @@
-import { createEvent, getEvents } from "../controllers/event.controller.ts";
+import { createEvent, getEvents, getEventsById } from "../controllers/event.controller.ts";
 import { getUserByName } from "../controllers/user.controller.ts";
 import { corsHeaders } from "../deps.ts";
 
@@ -10,6 +10,19 @@ export const handleEventRequest = async (req: Request): Promise<Response> => {
     if (req.method === "OPTIONS") {
         return new Response(null, { status: 204, headers: corsHeaders });
     }
+
+    //_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-
+    // GET /api/events?id
+    //_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-
+    if (req.method === "GET" && url.pathname.startsWith("/api/events/")) {
+        const id_user = req.url.split('?id=')[1]
+        const events = await getEventsById(id_user);
+        return new Response(JSON.stringify(events), {
+          status: 200,
+          headers: corsHeaders,
+        });
+    }
+
     //_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-
     // GET /api/events
     //_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-
@@ -42,7 +55,7 @@ export const handleEventRequest = async (req: Request): Promise<Response> => {
       }
 
       // 🔹 guests es opcional -> Convertimos nombres en IDs si existen
-      let guests: number[] = [];
+      const guests: number[] = [];
       if (data.guests && Array.isArray(data.guests)) {
         for (const guestName of data.guests) {
           const guest = await getUserByName(guestName);
@@ -57,6 +70,34 @@ export const handleEventRequest = async (req: Request): Promise<Response> => {
               },
             );
           }
+
+          if (guest.id_user == data.created_by) {
+            return new Response(
+                JSON.stringify({
+                  error: "Usted no puede asignarse como invitado",
+                }),
+                {
+                  status: 400,
+                  headers: corsHeaders,
+                },
+              );
+          }
+
+          if (data.guests) {
+            const uniqueGuests = new Set(data.guests);
+            if (uniqueGuests.size !== data.guests.length) {
+              return new Response(
+                JSON.stringify({
+                  error: "Hay invitados repetidos en la lista",
+                }),
+                {
+                  status: 400,
+                  headers: corsHeaders,
+                },
+              );
+            }
+          }
+
           if (guest.id_user)
           guests.push(guest.id_user);
         }

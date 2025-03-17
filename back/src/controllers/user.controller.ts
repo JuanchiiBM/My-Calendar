@@ -13,13 +13,27 @@ export async function getUsers(): Promise<UserProps[]> {
 
 export const getUserByName = async (name: string): Promise<UserProps | null> => {
     try {
+        const trimmedName = name.trim();
         const result = await client.queryObject<UserProps>(
-            `SELECT * FROM "User" WHERE name = $1 LIMIT 1`,
-            [name]
+            `SELECT * FROM "User" WHERE TRIM(name) = $1 LIMIT 1`,
+            [trimmedName]
         );
         return result.rows.length > 0 ? result.rows[0] : null;
     } catch (error) {
         console.error("Error obteniendo usuario por nombre", error);
+        throw new Error("Error al obtener usuario");
+    }
+};
+
+export const getUserById = async (id: string): Promise<UserProps | null> => {
+    try {
+        const result = await client.queryObject<UserProps>(
+            `SELECT * FROM "User" WHERE TRIM(id_user) = $1 LIMIT 1`,
+            [id]
+        );
+        return result.rows.length > 0 ? result.rows[0] : null;
+    } catch (error) {
+        console.error("Error obteniendo usuario por id", error);
         throw new Error("Error al obtener usuario");
     }
 };

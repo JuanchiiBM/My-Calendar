@@ -6,4 +6,6 @@ export interface EventProps {
     end_date: string;
     created_by: number
     category_id: number;
+    guests?: Array<string>
+    invited_user?: Array<number>
 }

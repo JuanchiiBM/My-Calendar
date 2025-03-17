@@ -12,11 +12,20 @@ import EventModal from "@/components/calendar/eventModal";
 import useCalendarEvents from "@/hooks/calendar/useCalendarEvents";
 import useIconButtons from "@/hooks/calendar/useIconButtons";
 import useThemeToggle from "@/hooks/useThemeToggle";
+import { EventInput } from "@fullcalendar/core/index.js";
+import useSetEvents from "@/hooks/calendar/useSetEvents";
+
+const id_user = localStorage.getItem('dataUser')
+
+/*
+ - Agregar validacion no - en crear nombre de usuario
+*/
 
 const Calendar = () => {
     const { theme, toggleTheme } = useThemeToggle();
+    const [events, setEvents] = useState<EventInput[]>([]);
+
     const {
-        events,
         newEventData,
         isModalOpen,
         isEditing,
@@ -30,7 +39,9 @@ const Calendar = () => {
         handleEventResize,
         setIsModalOpen,
         setNewEventData,
-    } = useCalendarEvents();
+    } = useCalendarEvents(events, setEvents);
+
+    useSetEvents(setEvents, `/api/events/?id=${id_user}`)
 
     useIconButtons();
 

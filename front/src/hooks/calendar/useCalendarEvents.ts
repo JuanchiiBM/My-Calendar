@@ -1,23 +1,19 @@
 import { useState } from "react";
 import { EventClickArg, EventInput } from "@fullcalendar/core";
+import { EventMidle, EventProps } from "@/types/eventModel";
 
-const useCalendarEvents = () => {
-    const [events, setEvents] = useState<EventInput[]>([]);
+const useCalendarEvents = (events: EventInput[], setEvents: React.Dispatch<React.SetStateAction<EventInput[]>>) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [editingEventId, setEditingEventId] = useState<string | null>(null);
-    const [newEventData, setNewEventData] = useState<{
-        title: string,
-        start: string,
-        end: string,
-        color: string,
-        description: string
-    }>({
+    const [newEventData, setNewEventData] = useState<{ title: string; start: string; end: string; color: string; description: string; } & EventMidle>({
         title: "",
         start: "",
         end: "",
-        color: "#3788d8",
-        description: ""
+        color: "#999999",
+        description: "",
+        category_id: 1,
+        name_invited_user: undefined
     });
 
     const handleSelect = (info: any) => {
@@ -27,7 +23,9 @@ const useCalendarEvents = () => {
             description: "",
             start: info.startStr,
             end: info.endStr,
-            color: "#3788d8",
+            color: "#999999",
+            category_id: 1,
+            name_invited_user: undefined
         });
         setIsModalOpen(true);
     };
@@ -42,7 +40,9 @@ const useCalendarEvents = () => {
             description: "",
             start: `${info.dateStr}T${argentinaTime.toISOString().split('T')[1].slice(0, 5)}`,
             end: `${info.dateStr}T${new Date(argentinaTime.getTime() + 30 * 60000).toISOString().split('T')[1].slice(0, 5)}`,
-            color: "#3788d8"
+            color: "#999999",
+            category_id: 1,
+            name_invited_user: undefined
         });
         setIsModalOpen(true);
     };
@@ -57,7 +57,9 @@ const useCalendarEvents = () => {
             description: "",
             start: argentinaTime.toISOString().slice(0, 16),
             end: new Date(argentinaTime.getTime() + 30 * 60000).toISOString().slice(0, 16),
-            color: "#3788d8"
+            color: "#999999",
+            category_id: 1,
+            name_invited_user: undefined
         });
         setIsModalOpen(true);
     };
@@ -66,14 +68,16 @@ const useCalendarEvents = () => {
         setEditingEventId(info.event.id);
         setIsEditing(true);
         setIsModalOpen(true);
-        console.log(info.event.startStr)
+        console.log(info.event.extendedProps)
         console.log(info.event.startStr.slice(0, 16))
         setNewEventData({
             title: info.event.title,
             description: info.event.extendedProps.description || "",
             start: info.event.startStr.slice(0, 16),
             end: info.event.endStr.slice(0, 16),
-            color: info.event.backgroundColor || "#3788d8"
+            color: info.event.backgroundColor,
+            category_id: info.event.extendedProps.category_id,
+            name_invited_user: info.event.extendedProps.name_invited_user
         });
     };
 
@@ -87,21 +91,19 @@ const useCalendarEvents = () => {
     };
 
     const handleSaveEvent = () => {
-        if (newEventData.title) {
-            if (isEditing && editingEventId) {
-                setEvents((prevEvents) =>
-                    prevEvents.map((event) =>
-                        event.id === editingEventId ? { ...event, ...newEventData } : event
-                    )
-                );
-            } else {
-                setEvents([...events, { id: Date.now().toString(), ...newEventData }]);
-            }
-
-            setIsModalOpen(false);
-            setIsEditing(false);
-            setEditingEventId(null);
+        if (isEditing && editingEventId) {
+            setEvents((prevEvents) =>
+                prevEvents.map((event) =>
+                    event.id === editingEventId ? { ...event, ...newEventData } : event
+                )
+            );
+        } else {
+            setEvents([...events, { id: Date.now().toString(), ...newEventData }]);
         }
+
+        setIsModalOpen(false);
+        setIsEditing(false);
+        setEditingEventId(null);
     };
 
     const handleEventDrop = (info: any) => {
@@ -121,7 +123,6 @@ const useCalendarEvents = () => {
     };
 
     return {
-        events,
         newEventData,
         isModalOpen,
         isEditing,
