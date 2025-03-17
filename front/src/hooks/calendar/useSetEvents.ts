@@ -7,7 +7,9 @@ const useSetEvents = (setEvents: React.Dispatch<React.SetStateAction<EventInput[
     const events = useSet(endpoint)
 
     const eventsFormatted: EventInput[] = events.map((ev: EventProps) => ({
+        id: ev.id_event?.toString(),
         title: ev.title,
+        created_by: ev.created_by,
         description: ev.description,
         start: ev.start_date,
         end: ev.end_date,

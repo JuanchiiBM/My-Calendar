@@ -2,6 +2,8 @@ import { useState } from "react";
 import { EventClickArg, EventInput } from "@fullcalendar/core";
 import { EventMidle, EventProps } from "@/types/eventModel";
 
+const id_user = parseInt(localStorage.getItem('dataUser') || '')
+
 const useCalendarEvents = (events: EventInput[], setEvents: React.Dispatch<React.SetStateAction<EventInput[]>>) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
@@ -13,6 +15,7 @@ const useCalendarEvents = (events: EventInput[], setEvents: React.Dispatch<React
         color: "#999999",
         description: "",
         category_id: 1,
+        created_by: id_user,
         name_invited_user: undefined
     });
 
@@ -42,6 +45,7 @@ const useCalendarEvents = (events: EventInput[], setEvents: React.Dispatch<React
             end: `${info.dateStr}T${new Date(argentinaTime.getTime() + 30 * 60000).toISOString().split('T')[1].slice(0, 5)}`,
             color: "#999999",
             category_id: 1,
+            created_by: id_user,
             name_invited_user: undefined
         });
         setIsModalOpen(true);
@@ -59,6 +63,7 @@ const useCalendarEvents = (events: EventInput[], setEvents: React.Dispatch<React
             end: new Date(argentinaTime.getTime() + 30 * 60000).toISOString().slice(0, 16),
             color: "#999999",
             category_id: 1,
+            created_by: id_user,
             name_invited_user: undefined
         });
         setIsModalOpen(true);
@@ -77,12 +82,14 @@ const useCalendarEvents = (events: EventInput[], setEvents: React.Dispatch<React
             end: info.event.endStr.slice(0, 16),
             color: info.event.backgroundColor,
             category_id: info.event.extendedProps.category_id,
+            created_by: info.event.extendedProps.created_by,
             name_invited_user: info.event.extendedProps.name_invited_user
         });
     };
 
     const handleDeleteEvent = () => {
         if (editingEventId) {
+            console.log(events)
             setEvents((prevEvents) => prevEvents.filter((event) => event.id !== editingEventId));
             setIsModalOpen(false);
             setIsEditing(false);
