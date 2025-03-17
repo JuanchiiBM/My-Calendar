@@ -114,7 +114,7 @@ export const handleEventRequest = async (req: Request): Promise<Response> => {
         guests,
       );
 
-      return new Response(JSON.stringify(event), {
+      return new Response(JSON.stringify({ status: 'ok', message: 'Evento creado'}), {
         status: 201,
         headers: corsHeaders,
       });

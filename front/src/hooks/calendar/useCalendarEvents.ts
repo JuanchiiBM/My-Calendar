@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { EventClickArg, EventInput } from "@fullcalendar/core";
-import { EventMidle, EventProps } from "@/types/eventModel";
+import { EventProps, EventForCalendarEvents } from "@/types/eventModel";
+import { POSTFunction } from "@/utils/helpers/httpFunctions";
+import useAlerts from "../useAlerts";
 
 const id_user = parseInt(localStorage.getItem('dataUser') || '')
 
@@ -8,7 +10,7 @@ const useCalendarEvents = (events: EventInput[], setEvents: React.Dispatch<React
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [editingEventId, setEditingEventId] = useState<string | null>(null);
-    const [newEventData, setNewEventData] = useState<{ title: string; start: string; end: string; color: string; description: string; } & EventMidle>({
+    const [newEventData, setNewEventData] = useState<EventForCalendarEvents>({
         title: "",
         start: "",
         end: "",
@@ -105,12 +107,8 @@ const useCalendarEvents = (events: EventInput[], setEvents: React.Dispatch<React
                 )
             );
         } else {
-            setEvents([...events, { id: Date.now().toString(), ...newEventData }]);
+            handlePOSTFunction(newEventData)
         }
-
-        setIsModalOpen(false);
-        setIsEditing(false);
-        setEditingEventId(null);
     };
 
     const handleEventDrop = (info: any) => {
@@ -128,6 +126,40 @@ const useCalendarEvents = (events: EventInput[], setEvents: React.Dispatch<React
             )
         );
     };
+
+    const handleModifyDataObject = (_dataObject: EventForCalendarEvents) => {
+        const _formattedDataObject: EventProps = {
+            title: _dataObject.title,
+            description: _dataObject.description,
+            start_date: _dataObject.start,
+            end_date: _dataObject.end,
+            category_id: _dataObject.category_id,
+            guests: _dataObject.name_invited_user,
+            created_by: _dataObject.created_by
+        }
+
+        return _formattedDataObject
+    }
+
+    const handleSuccess = () => {
+        setEvents([...events, { id: Date.now().toString(), ...newEventData }]);
+        setIsModalOpen(false);
+        setIsEditing(false);
+        setEditingEventId(null);
+    }
+
+    const handleError = () => {
+        setIsModalOpen(true);
+    }
+
+    const handlePUTFunction = (_dataObject: any) => {
+    }
+
+    const handlePOSTFunction = async (_dataObject: EventForCalendarEvents) => {
+        const _formattedDataObject = handleModifyDataObject(_dataObject)
+        const response = await POSTFunction(`/api/events`, _formattedDataObject)
+        useAlerts(response, handleSuccess, handleError)
+    }
 
     return {
         newEventData,

@@ -87,8 +87,8 @@ const EventModal: React.FC<EventModalProps> = ({ isModalOpen, setIsModalOpen, is
                             </Autocomplete>
                             <Input label="Invitados (Separelos con ' - ')"
                                 isDisabled={guest}
-                                value={newEventData.name_invited_user && newEventData.name_invited_user.join(' - ')}
-                                onChange={(e) => {console.log(newEventData.name_invited_user)}}
+                                value={newEventData.name_invited_user && newEventData.name_invited_user.join('-')}
+                                onValueChange={(e) => {setNewEventData({ ...newEventData, name_invited_user: e.split('-')})}}
                             />
                         </Form>
                     </ModalBody>
