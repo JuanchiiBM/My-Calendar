@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { EventClickArg, EventInput } from "@fullcalendar/core";
 import { EventProps, EventForCalendarEvents } from "@/types/eventModel";
-import { POSTFunction } from "@/utils/helpers/httpFunctions";
+import { POSTFunction, PUTFunction } from "@/utils/helpers/httpFunctions";
 import useAlerts from "../useAlerts";
 
 const id_user = parseInt(localStorage.getItem('dataUser') || '')
@@ -18,6 +18,7 @@ const useCalendarEvents = (events: EventInput[], setEvents: React.Dispatch<React
         description: "",
         category_id: 1,
         created_by: id_user,
+        id_event: undefined,
         name_invited_user: undefined
     });
 
@@ -30,6 +31,7 @@ const useCalendarEvents = (events: EventInput[], setEvents: React.Dispatch<React
             end: info.endStr,
             color: "#999999",
             category_id: 1,
+            id_event: undefined,
             name_invited_user: undefined
         });
         setIsModalOpen(true);
@@ -48,6 +50,7 @@ const useCalendarEvents = (events: EventInput[], setEvents: React.Dispatch<React
             color: "#999999",
             category_id: 1,
             created_by: id_user,
+            id_event: undefined,
             name_invited_user: undefined
         });
         setIsModalOpen(true);
@@ -65,6 +68,7 @@ const useCalendarEvents = (events: EventInput[], setEvents: React.Dispatch<React
             end: new Date(argentinaTime.getTime() + 30 * 60000).toISOString().slice(0, 16),
             color: "#999999",
             category_id: 1,
+            id_event: undefined,
             created_by: id_user,
             name_invited_user: undefined
         });
@@ -83,6 +87,7 @@ const useCalendarEvents = (events: EventInput[], setEvents: React.Dispatch<React
             start: info.event.startStr.slice(0, 16),
             end: info.event.endStr.slice(0, 16),
             color: info.event.backgroundColor,
+            id_event: info.event.extendedProps.id_event,
             category_id: info.event.extendedProps.category_id,
             created_by: info.event.extendedProps.created_by,
             name_invited_user: info.event.extendedProps.name_invited_user
@@ -101,30 +106,14 @@ const useCalendarEvents = (events: EventInput[], setEvents: React.Dispatch<React
 
     const handleSaveEvent = () => {
         if (isEditing && editingEventId) {
-            setEvents((prevEvents) =>
-                prevEvents.map((event) =>
-                    event.id === editingEventId ? { ...event, ...newEventData } : event
-                )
-            );
+            handlePUTFunction(newEventData)
         } else {
             handlePOSTFunction(newEventData)
         }
     };
 
-    const handleEventDrop = (info: any) => {
-        setEvents((prevEvents) =>
-            prevEvents.map((event) =>
-                event.id === info.event.id ? { ...event, start: info.event.startStr, end: info.event.endStr } : event
-            )
-        );
-    };
-
-    const handleEventResize = (info: any) => {
-        setEvents((prevEvents) =>
-            prevEvents.map((event) =>
-                event.id === info.event.id ? { ...event, start: info.event.startStr, end: info.event.endStr } : event
-            )
-        );
+    const handleEventResizeAndDrop = (info: EventClickArg) => {
+        handlePUTFunctionResizeAndDrop(newEventData, info)
     };
 
     const handleModifyDataObject = (_dataObject: EventForCalendarEvents) => {
@@ -141,8 +130,31 @@ const useCalendarEvents = (events: EventInput[], setEvents: React.Dispatch<React
         return _formattedDataObject
     }
 
-    const handleSuccess = () => {
+    const handleSuccessPOST = () => {
         setEvents([...events, { id: Date.now().toString(), ...newEventData }]);
+        setIsModalOpen(false);
+        setIsEditing(false);
+        setEditingEventId(null);
+    }
+
+    //ARREGLAR NO ESTA FUNCIONANDO CORRECTAMENTE
+    const handleSuccessPUTResizeAndDrop = (info: EventClickArg) => {
+        setEvents((prevEvents) =>
+            prevEvents.map((event) =>
+                event.id === info.event.id ? { ...event, start: info.event.startStr, end: info.event.endStr } : event
+            )
+        );
+        setIsModalOpen(false);
+        setIsEditing(false);
+        setEditingEventId(null);
+    }
+
+    const handleSuccessPUT = () => {
+        setEvents((prevEvents) =>
+            prevEvents.map((event) =>
+                event.id === editingEventId ? { ...event, ...newEventData } : event
+            )
+        );
         setIsModalOpen(false);
         setIsEditing(false);
         setEditingEventId(null);
@@ -152,13 +164,24 @@ const useCalendarEvents = (events: EventInput[], setEvents: React.Dispatch<React
         setIsModalOpen(true);
     }
 
-    const handlePUTFunction = (_dataObject: any) => {
+    const handlePUTFunction = async (_dataObject: EventForCalendarEvents) => {
+        const _formattedDataObject = handleModifyDataObject(_dataObject)
+        console.log(_dataObject)
+        const response = await PUTFunction(`/api/events/?event_id=${_dataObject.id_event}`, _formattedDataObject)
+        useAlerts(response, handleSuccessPUT, handleError)
+    }
+
+    const handlePUTFunctionResizeAndDrop = async (_dataObject: EventForCalendarEvents, info: EventClickArg) => {
+        const _formattedDataObject = handleModifyDataObject(_dataObject)
+        console.log(_dataObject)
+        const response = await PUTFunction(`/api/events/?event_id=${_dataObject.id_event}`, _formattedDataObject)
+        useAlerts(response, handleSuccessPUTResizeAndDrop(info), handleError)
     }
 
     const handlePOSTFunction = async (_dataObject: EventForCalendarEvents) => {
         const _formattedDataObject = handleModifyDataObject(_dataObject)
         const response = await POSTFunction(`/api/events`, _formattedDataObject)
-        useAlerts(response, handleSuccess, handleError)
+        useAlerts(response, handleSuccessPOST, handleError)
     }
 
     return {
@@ -171,8 +194,7 @@ const useCalendarEvents = (events: EventInput[], setEvents: React.Dispatch<React
         handleEditEvent,
         handleDeleteEvent,
         handleSaveEvent,
-        handleEventDrop,
-        handleEventResize,
+        handleEventResizeAndDrop,
         setIsModalOpen,
         setNewEventData,
     };

@@ -132,26 +132,16 @@ export const updateEvent = async (
       guests?.map(async (guest) => {
         const user = await getUserByName(guest);
         return user?.id_user;
-      }) || []
+      }) || [],
     );
 
-    // 🔹 Construir query dinámico para actualizar solo los campos enviados
-    const fields: string[] = [];
-    const values: any[] = [];
-    let index = 1;
-
-    for (const key in updatedData) {
-      fields.push(`${key} = $${index}`);
-      values.push((updatedData as any)[key]);
-      index++;
-    }
-
-    if (fields.length > 0) {
-      await client.queryArray(
-        `UPDATE "Event" SET ${fields.join(", ")} WHERE id_event = $${index}`,
-        [...values, event_id],
-      );
-    }
+    await client.queryArray(
+        `UPDATE "Event" 
+         SET title = $1, description = $2, start_date = $3, end_date = $4, category_id = $5 
+         WHERE id_event = $6;`,
+        [updatedData.title, updatedData.description, updatedData.start_date, 
+        updatedData.end_date, updatedData.category_id, event_id]
+    );
 
     // 🔹 Actualizar invitados en la tabla EventGuest si `guests` está definido
     if (guests) {
@@ -172,7 +162,9 @@ export const updateEvent = async (
       }
 
       // 🔥 Buscar invitados a agregar (los nuevos que no estaban antes)
-      const guestsToAdd = idGuests.filter((id) => id && !currentGuestIds.includes(id));
+      const guestsToAdd = idGuests.filter((id) =>
+        id && !currentGuestIds.includes(id)
+      );
       for (const guestId of guestsToAdd) {
         await addGuestToEvent(event_id, guestId || 0);
       }

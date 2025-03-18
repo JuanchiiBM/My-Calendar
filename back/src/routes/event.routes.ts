@@ -141,7 +141,7 @@ export const handleEventRequest = async (req: Request): Promise<Response> => {
           JSON.stringify({ error: "ID de evento inválido" }),
           {
             status: 400,
-            headers: { "Content-Type": "application/json" },
+            headers: corsHeaders,
           },
         );
       }
@@ -149,23 +149,23 @@ export const handleEventRequest = async (req: Request): Promise<Response> => {
       if (!data.created_by) {
         return new Response(JSON.stringify({ error: "Se requiere user_id" }), {
           status: 400,
-          headers: { "Content-Type": "application/json" },
+          headers: corsHeaders,
         });
       }
 
       try {
-        const result = await updateEvent(event_id, data.created_by, data.guests);
+        const _result = await updateEvent(event_id, data, data.guests);
 
-        return new Response(JSON.stringify(result), {
+        return new Response(JSON.stringify({ status: 'ok', message: 'Evento actualizado'}), {
           status: 200,
-          headers: { "Content-Type": "application/json" },
+          headers: corsHeaders,
         });
       } catch (error: any) {
         return new Response(
           JSON.stringify({ error: `Error en el servidor: ${error.message}` }),
           {
             status: 500,
-            headers: { "Content-Type": "application/json" },
+            headers: corsHeaders,
           },
         );
       }

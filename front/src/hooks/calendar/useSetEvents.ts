@@ -15,7 +15,8 @@ const useSetEvents = (setEvents: React.Dispatch<React.SetStateAction<EventInput[
         end: ev.end_date,
         color: ev.color,
         category_id: ev.category_id,
-        name_invited_user: ev.name_invited_user
+        name_invited_user: ev.name_invited_user,
+        id_event: ev.id_event
     }))
 
     useEffect(() => {
