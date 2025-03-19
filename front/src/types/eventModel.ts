@@ -8,6 +8,7 @@ export interface EventProps {
     category_id: number;
     color?: string;
     guests?: Array<string>;
+    id_user?: number;
     invited_user?: Array<number>;
     name_invited_user?: Array<string>;
 }

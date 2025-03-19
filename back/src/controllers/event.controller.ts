@@ -5,6 +5,7 @@ import {
   removeGuestFromEvent,
 } from "./event.guest.controller.ts";
 import { getUserByName } from "./user.controller.ts";
+import { getIdGuests } from "../helpers/getIdGuests.ts";
 
 export const getEvents = async (): Promise<EventProps[]> => {
   try {
@@ -66,7 +67,7 @@ export const createEvent = async (
   start_date: string,
   end_date: string,
   category_id: number,
-  created_by: number, // ✅ Agregado como obligatorio
+  created_by: number,
   guests?: number[],
 ): Promise<EventProps> => {
   try {
@@ -110,7 +111,7 @@ export const createEvent = async (
     };
   } catch (error: any) {
     console.error("Error creando evento", error);
-    throw new Error(`Error al crear evento: ${error.message}`);
+    throw new Error(`${error.message}`);
   }
 };
 
@@ -128,19 +129,31 @@ export const updateEvent = async (
     if (eventCheck.rows.length === 0) {
       throw new Error("El evento no existe.");
     }
-    const idGuests = await Promise.all(
-      guests?.map(async (guest) => {
-        const user = await getUserByName(guest);
-        return user?.id_user;
-      }) || [],
+
+    // 🔹 Verificar si el editor es uno mismo
+    const editorCheck = await client.queryObject<{ id_event: number }>(
+      `SELECT created_by, id_event FROM "Event" WHERE id_event = $1 AND created_by = $2`,
+      [updatedData.id_event, updatedData.id_user],
     );
+    if (editorCheck.rows.length === 0) {
+      throw new Error("Usted no posee permisos para editar este evento.");
+    }
+
+    // 🔹 Obtener id de usuarios invitados
+    const idGuests = await getIdGuests(guests);
 
     await client.queryArray(
-        `UPDATE "Event" 
+      `UPDATE "Event" 
          SET title = $1, description = $2, start_date = $3, end_date = $4, category_id = $5 
          WHERE id_event = $6;`,
-        [updatedData.title, updatedData.description, updatedData.start_date, 
-        updatedData.end_date, updatedData.category_id, event_id]
+      [
+        updatedData.title,
+        updatedData.description,
+        updatedData.start_date,
+        updatedData.end_date,
+        updatedData.category_id,
+        event_id,
+      ],
     );
 
     // 🔹 Actualizar invitados en la tabla EventGuest si `guests` está definido
@@ -173,6 +186,42 @@ export const updateEvent = async (
     return { message: "Evento actualizado correctamente." };
   } catch (error: any) {
     console.error("Error actualizando evento", error);
-    throw new Error(`Error al actualizar evento: ${error.message}`);
+    throw new Error(`${error.message}`);
+  }
+};
+
+export const deleteEvent = async (
+  id_event: number,
+  id_user: number,
+): Promise<{ message: string }> => {
+  try {
+    // 🔹 Verificar si el evento existe
+    const eventCheck = await client.queryObject<{ id_event: number }>(
+      `SELECT id_event FROM "Event" WHERE id_event = $1`,
+      [id_event],
+    );
+    if (eventCheck.rows.length === 0) {
+      throw new Error("El evento no existe.");
+    }
+
+    // 🔹 Verificar si el editor es uno mismo
+    const editorCheck = await client.queryObject<{ id_event: number }>(
+      `SELECT created_by, id_event FROM "Event" WHERE id_event = $1 AND created_by = $2`,
+      [id_event, id_user],
+    );
+    if (editorCheck.rows.length === 0) {
+      throw new Error("Usted no posee permisos para eliminar este evento.");
+    }
+
+    await client.queryArray(
+      `DELETE FROM "Event" WHERE id_event = $1;`,
+      [id_event],
+    );
+
+    return { message: "Evento eliminado correctamente." };
+
+  } catch (error: any) {
+    console.error("Error eliminando evento", error);
+    throw new Error(error.message);
   }
 };

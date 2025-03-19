@@ -72,6 +72,6 @@ export const removeGuestFromEvent = async (event_id: number, user_id: number): P
     return { message: "Invitado eliminado exitosamente." };
   } catch (error: any) {
     console.error("Error eliminando invitado", error);
-    throw new Error(`Error al eliminar invitado: ${error.message}`);
+    throw new Error(`${error.message}`);
   }
 };

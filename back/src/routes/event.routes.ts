@@ -1,11 +1,12 @@
 import {
   createEvent,
+  deleteEvent,
   getEvents,
   getEventsById,
   updateEvent,
 } from "../controllers/event.controller.ts";
-import { getUserByName } from "../controllers/user.controller.ts";
 import { corsHeaders } from "../deps.ts";
+import { errorGuestHandler } from "../helpers/errorGuestsHandler.ts";
 
 export const handleEventRequest = async (req: Request): Promise<Response> => {
   try {
@@ -60,53 +61,7 @@ export const handleEventRequest = async (req: Request): Promise<Response> => {
 
       // 🔹 guests es opcional -> Convertimos nombres en IDs si existen
       const guests: number[] = [];
-      if (data.guests && Array.isArray(data.guests)) {
-        for (const guestName of data.guests) {
-          const guest = await getUserByName(guestName);
-          if (!guest) {
-            return new Response(
-              JSON.stringify({
-                error: "Alguno de los invitados no es un usuario",
-              }),
-              {
-                status: 400,
-                headers: corsHeaders,
-              },
-            );
-          }
-
-          if (guest.id_user == data.created_by) {
-            return new Response(
-              JSON.stringify({
-                error: "Usted no puede asignarse como invitado",
-              }),
-              {
-                status: 400,
-                headers: corsHeaders,
-              },
-            );
-          }
-
-          if (data.guests) {
-            const uniqueGuests = new Set(data.guests);
-            if (uniqueGuests.size !== data.guests.length) {
-              return new Response(
-                JSON.stringify({
-                  error: "Hay invitados repetidos en la lista",
-                }),
-                {
-                  status: 400,
-                  headers: corsHeaders,
-                },
-              );
-            }
-          }
-
-          if (guest.id_user) {
-            guests.push(guest.id_user);
-          }
-        }
-      }
+      await errorGuestHandler(data, guests);
 
       // 🔹 Llamar al controller con los datos convertidos
       const event = await createEvent(
@@ -120,7 +75,11 @@ export const handleEventRequest = async (req: Request): Promise<Response> => {
       );
 
       return new Response(
-        JSON.stringify({ status: "ok", message: "Evento creado", event: event}),
+        JSON.stringify({
+          status: "ok",
+          message: "Evento creado",
+          event: event,
+        }),
         {
           status: 201,
           headers: corsHeaders,
@@ -153,22 +112,33 @@ export const handleEventRequest = async (req: Request): Promise<Response> => {
         });
       }
 
-      try {
-        const _result = await updateEvent(event_id, data, data.guests);
+      // 🔹 guests es opcional -> Convertimos nombres en IDs si existen
+      const guests: number[] = [];
+      await errorGuestHandler(data, guests);
 
-        return new Response(JSON.stringify({ status: 'ok', message: 'Evento actualizado'}), {
+      const _result = await updateEvent(event_id, data, data.guests);
+
+      return new Response(
+        JSON.stringify({ status: "ok", message: "Evento actualizado" }),
+        {
           status: 200,
           headers: corsHeaders,
-        });
-      } catch (error: any) {
-        return new Response(
-          JSON.stringify({ error: `Error en el servidor: ${error.message}` }),
-          {
-            status: 500,
-            headers: corsHeaders,
-          },
-        );
-      }
+        },
+      );
+    }
+
+    //_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-
+    // DELETE /api/eventguests
+    //_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-
+    if (req.method === "DELETE" && url.pathname.startsWith("/api/events/")) {
+      const event_id = Number(req.url.split("?event_id=")[1].split("&")[0]);
+      const user_id = Number(req.url.split("?user_id=")[1]);
+      console.log(event_id, user_id);
+      const events = await deleteEvent(event_id, user_id);
+      return new Response(JSON.stringify(events), {
+        status: 200,
+        headers: corsHeaders,
+      });
     }
 
     //_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-

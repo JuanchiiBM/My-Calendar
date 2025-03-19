@@ -146,6 +146,7 @@ const useCalendarEvents = (events: EventInput[], setEvents: React.Dispatch<React
             start_date: _dataObject.start,
             end_date: _dataObject.end,
             category_id: _dataObject.category_id,
+            id_user: id_user,
             guests: _dataObject.name_invited_user,
             created_by: _dataObject.created_by
         }
