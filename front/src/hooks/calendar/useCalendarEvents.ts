@@ -117,12 +117,16 @@ const useCalendarEvents = (events: EventInput[], setEvents: React.Dispatch<React
 
         const updatedEventData = {
             ...newEventData,
-            start: info.event.startStr,
-            end: info.event.endStr,
-            id_event: info.event.extendedProps.id_event
+            title: info.event.title,
+            description: info.event.extendedProps.description || "",
+            start: info.event.startStr.slice(0, 16),
+            end: info.event.endStr.slice(0, 16),
+            color: info.event.backgroundColor,
+            category_id: info.event.extendedProps.category_id,
+            created_by: info.event.extendedProps.created_by,
+            name_invited_user: info.event.extendedProps.name_invited_user,
+            id_event: info.event.extendedProps.id_event ? info.event.extendedProps.id_event : newEventData.id_event
         };
-
-        console.log(info)
 
         setEvents((prevEvents) =>
             prevEvents.map((event) =>

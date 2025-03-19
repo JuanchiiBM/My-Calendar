@@ -22,8 +22,6 @@ const id_user = localStorage.getItem('dataUser')
  - Agregar spinner y en vez de usar localstorage usar context (Puta madre)
  - Agregar ruta de EventGuest para eliminar un evento al que te invitaron
  - Agregar validacion para no poder editar eventos que no sean propios
- - Arreglar al hacer drop el PUT para que agarre el ID sin necesidad de clickearlo
- - Resize y drop no hace PUT bien aunque muestre que si
 */
 
 const Calendar = () => {
