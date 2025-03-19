@@ -133,7 +133,7 @@ export const updateEvent = async (
     // 🔹 Verificar si el editor es uno mismo
     const editorCheck = await client.queryObject<{ id_event: number }>(
       `SELECT created_by, id_event FROM "Event" WHERE id_event = $1 AND created_by = $2`,
-      [updatedData.id_event, updatedData.id_user],
+      [event_id, updatedData.id_user],
     );
     if (editorCheck.rows.length === 0) {
       throw new Error("Usted no posee permisos para editar este evento.");

@@ -133,9 +133,9 @@ export const handleEventRequest = async (req: Request): Promise<Response> => {
     if (req.method === "DELETE" && url.pathname.startsWith("/api/events/")) {
       const event_id = Number(req.url.split("?event_id=")[1].split("&")[0]);
       const user_id = Number(req.url.split("?user_id=")[1]);
-      console.log(event_id, user_id);
-      const events = await deleteEvent(event_id, user_id);
-      return new Response(JSON.stringify(events), {
+
+      await deleteEvent(event_id, user_id);
+      return new Response(JSON.stringify({ status: "ok", message: "Evento eliminado correctamente"}), {
         status: 200,
         headers: corsHeaders,
       });

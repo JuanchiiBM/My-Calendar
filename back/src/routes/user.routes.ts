@@ -70,6 +70,13 @@ export const handleUserRequest = async (req: Request): Promise<Response> => {
         });
       }
 
+      if (data.name.includes('-')) {
+        return new Response(JSON.stringify({ error: "El nombre de usuario no puede contener '-'" }), {
+          status: 400,
+          headers: corsHeaders,
+        });
+      }
+
       if (userExist && data.password == userExist.password) {
         return new Response(JSON.stringify({ user: userExist, message: "Inicio de sesión exitoso", status: 'ok' }), {
           status: 201,

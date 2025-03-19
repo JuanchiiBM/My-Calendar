@@ -67,3 +67,25 @@ export const PUTFunction = async (endpoint: string, data: any) => {
         throw error;
     }
 };
+
+export const DELETEFunction = async (endpoint: string, data: any) => {
+    try {
+        const response = await fetch(`${URLBack}${endpoint}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+        const responseJson = response.json()
+
+        console.log('INIT_-_-_-_-_-_-_-_-_-')
+        console.log(endpoint)
+        console.log(responseJson)
+        console.log('FIN_-_-_-_-_-_-_-_-_-')
+
+        return await responseJson;
+    } catch (error) {
+        console.error('Error:', error);
+        throw error;
+    }
+};

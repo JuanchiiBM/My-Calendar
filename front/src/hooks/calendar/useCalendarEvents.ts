@@ -1,13 +1,17 @@
 import { useState } from "react";
 import { EventClickArg, EventInput } from "@fullcalendar/core";
 import { EventProps, EventForCalendarEvents } from "@/types/eventModel";
-import { POSTFunction, PUTFunction } from "@/utils/helpers/httpFunctions";
+import { DELETEFunction, POSTFunction, PUTFunction } from "@/utils/helpers/httpFunctions";
+import { QuestionAlert } from "@/components/sweetsAlerts";
+import { useGlobalContext } from "@/context/globalContext";
 import useAlerts from "../useAlerts";
 
 const id_user = parseInt(localStorage.getItem('dataUser') || '')
 let previousEventData: EventInput[]
 
 const useCalendarEvents = (events: EventInput[], setEvents: React.Dispatch<React.SetStateAction<EventInput[]>>) => {
+    const { setSpinner } = useGlobalContext()
+    const handleAlerts = useAlerts()
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [editingEventId, setEditingEventId] = useState<string | null>(null);
@@ -95,14 +99,28 @@ const useCalendarEvents = (events: EventInput[], setEvents: React.Dispatch<React
     };
 
     const handleDeleteEvent = () => {
-        if (editingEventId) {
-            console.log(events)
-            setEvents((prevEvents) => prevEvents.filter((event) => event.id !== editingEventId));
-            setIsModalOpen(false);
-            setIsEditing(false);
-            setEditingEventId(null);
-        }
+        QuestionAlert("Advertencia", "¿Estás seguro de que deseas eliminar este evento?", undefined, () => {
+            if (editingEventId) {
+                setEvents((prevEvents) => prevEvents.filter((event) => event.id !== editingEventId));
+                setIsModalOpen(false);
+                setIsEditing(false);
+                setEditingEventId(null);
+                handleDELETEFunction(newEventData)
+            }
+        })
     };
+
+    const handleDeleteInvitation = () => {
+        QuestionAlert("Advertencia", "¿Estás seguro de que deseas eliminar la invitación?", undefined, () => {
+            if (editingEventId) {
+                setEvents((prevEvents) => prevEvents.filter((event) => event.id !== editingEventId));
+                setIsModalOpen(false);
+                setIsEditing(false);
+                setEditingEventId(null);
+                handleInvitationDELETEFunction(newEventData)
+            }
+        })
+    }
 
     const handleSaveEvent = () => {
         if (isEditing && editingEventId) {
@@ -185,28 +203,43 @@ const useCalendarEvents = (events: EventInput[], setEvents: React.Dispatch<React
         setEditingEventId(null);
     }
 
+    const handleDELETEFunction = async (_dataObject: EventForCalendarEvents) => {
+        const _formattedDataObject = handleModifyDataObject(_dataObject)
+        setSpinner(true)
+        const response = await DELETEFunction(`/api/events/?event_id=${_dataObject.id_event}&?user_id=${id_user}`, _formattedDataObject)
+        handleAlerts(response, undefined, undefined)
+    }
+
+    const handleInvitationDELETEFunction = async (_dataObject: EventForCalendarEvents) => {
+        const _formattedDataObject = handleModifyDataObject(_dataObject)
+        setSpinner(true)
+        const response = await DELETEFunction(`/api/eventguests/?event_id=${_dataObject.id_event}&?user_id=${id_user}`, _formattedDataObject)
+        handleAlerts(response, handleSuccessPUT, handleError)
+    }
+
     const handleError = () => {
         setIsModalOpen(true);
     }
 
     const handlePUTFunction = async (_dataObject: EventForCalendarEvents) => {
         const _formattedDataObject = handleModifyDataObject(_dataObject)
-        console.log(_dataObject)
+        setSpinner(true)
         const response = await PUTFunction(`/api/events/?event_id=${_dataObject.id_event}`, _formattedDataObject)
-        useAlerts(response, handleSuccessPUT, handleError)
+        handleAlerts(response, handleSuccessPUT, handleError)
     }
 
     const handlePUTFunctionResizeAndDrop = async (_dataObject: EventForCalendarEvents, info: EventClickArg) => {
         const _formattedDataObject = handleModifyDataObject(_dataObject)
-        console.log(_dataObject)
+        setSpinner(true)
         const response = await PUTFunction(`/api/events/?event_id=${_dataObject.id_event}`, _formattedDataObject)
-        useAlerts(response, handleSuccessPUTResizeAndDrop, handleErrorPUTResizeAndDrop)
+        handleAlerts(response, handleSuccessPUTResizeAndDrop, handleErrorPUTResizeAndDrop)
     }
 
     const handlePOSTFunction = async (_dataObject: EventForCalendarEvents) => {
         const _formattedDataObject = handleModifyDataObject(_dataObject)
+        setSpinner(true)
         const response = await POSTFunction(`/api/events`, _formattedDataObject)
-        useAlerts(response, handleSuccessPOST(response), handleError)
+        handleAlerts(response, handleSuccessPOST(response), handleError)
     }
 
     return {
@@ -220,6 +253,7 @@ const useCalendarEvents = (events: EventInput[], setEvents: React.Dispatch<React
         handleDeleteEvent,
         handleSaveEvent,
         handleEventResizeAndDrop,
+        handleDeleteInvitation,
         setIsModalOpen,
         setNewEventData,
     };

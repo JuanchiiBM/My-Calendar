@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { createRoot } from "react-dom/client";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import listPlugin from "@fullcalendar/list";
@@ -14,18 +13,18 @@ import useIconButtons from "@/hooks/calendar/useIconButtons";
 import useThemeToggle from "@/hooks/useThemeToggle";
 import { EventInput } from "@fullcalendar/core/index.js";
 import useSetEvents from "@/hooks/calendar/useSetEvents";
+import { useGlobalContext } from "@/context/globalContext";
+import SpinnerComponent from "@/components/Spinner";
 
 const id_user = localStorage.getItem('dataUser')
 
 /*
- - Agregar validacion no - en crear nombre de usuario
- - Agregar spinner y en vez de usar localstorage usar context (Puta madre)
- - Agregar ruta de EventGuest para eliminar un evento al que te invitaron
- - Agregar validacion para no poder editar eventos que no sean propios
+    - Arreglar que al crear un evento, no puedo eliminarlo ni editarlo sin recargar la pagina
 */
 
 const Calendar = () => {
     const { theme, toggleTheme } = useThemeToggle();
+    const { spinner } = useGlobalContext()
     const [events, setEvents] = useState<EventInput[]>([]);
 
     const {
@@ -39,6 +38,7 @@ const Calendar = () => {
         handleDeleteEvent,
         handleSaveEvent,
         handleEventResizeAndDrop,
+        handleDeleteInvitation,
         setIsModalOpen,
         setNewEventData,
     } = useCalendarEvents(events, setEvents);
@@ -49,6 +49,7 @@ const Calendar = () => {
 
     return (
         <main className="bg-background w-full flex flex-col min-h-screen items-center justify-center p-4">
+            {spinner && <SpinnerComponent />}
             <Button isIconOnly variant="light" className="absolute right-2 top-2" onPress={toggleTheme}>
                 <Icon icon={theme === "light" ? "lucide:moon" : "lucide:sun"} width={20} />
             </Button>
@@ -92,6 +93,7 @@ const Calendar = () => {
                 setNewEventData={setNewEventData}
                 handleSaveEvent={handleSaveEvent}
                 handleDeleteEvent={handleDeleteEvent}
+                handleDeleteInvitation={handleDeleteInvitation}
             />
         </main>
     );

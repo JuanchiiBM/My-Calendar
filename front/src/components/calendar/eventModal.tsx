@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Input, DatePicker, Form, Autocomplete, AutocompleteItem } from "@heroui/react";
-import ColorPicker from "../colorPicker";
 import TextArea from "../textArea";
 import { EventModalProps } from "@/types/calendar/eventModal";
 import { I18nProvider } from "@react-aria/i18n";
@@ -12,7 +11,7 @@ import { CategoryProps } from "@/types/categoryModels";
 
 const id_user = localStorage.getItem('dataUser')
 
-const EventModal: React.FC<EventModalProps> = ({ isModalOpen, setIsModalOpen, isEditing, newEventData, setNewEventData, handleSaveEvent, handleDeleteEvent }) => {
+const EventModal: React.FC<EventModalProps> = ({ isModalOpen, setIsModalOpen, isEditing, newEventData, setNewEventData, handleSaveEvent, handleDeleteEvent, handleDeleteInvitation }) => {
     const { formatDateForPicker } = useFormatDateForPicker()
     const [guest, IsAGuest] = useState(false)
     const categorys: CategoryProps[] = useSet('/api/categorys')
@@ -95,7 +94,8 @@ const EventModal: React.FC<EventModalProps> = ({ isModalOpen, setIsModalOpen, is
                     <ModalFooter>
                         <Button variant="ghost" onPress={() => setIsModalOpen(false)}>Cancelar</Button>
                         <Button color="secondary" type="submit" form="event-form">{!guest && isEditing ? "Editar" : "Guardar"}</Button>
-                        {!guest && isEditing && <Button color="danger" onPress={handleDeleteEvent}>Eliminar</Button>}
+                        {(!guest && isEditing) ? <Button color="danger" onPress={handleDeleteEvent}>Eliminar</Button> : 
+                        (guest && isEditing) && <Button color="danger" onPress={handleDeleteInvitation}>Eliminar Invitación</Button>}
                     </ModalFooter>
                 </ModalContent>
             </Modal>

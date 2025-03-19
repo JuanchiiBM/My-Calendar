@@ -14,4 +14,5 @@ export interface EventModalProps {
     setNewEventData: React.Dispatch<React.SetStateAction<EventModalProps['newEventData']>>;
     handleSaveEvent: () => void;
     handleDeleteEvent: () => void;
+    handleDeleteInvitation: () => void;
 }
