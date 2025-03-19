@@ -5,6 +5,7 @@ import { POSTFunction, PUTFunction } from "@/utils/helpers/httpFunctions";
 import useAlerts from "../useAlerts";
 
 const id_user = parseInt(localStorage.getItem('dataUser') || '')
+let previousEventData: EventInput[]
 
 const useCalendarEvents = (events: EventInput[], setEvents: React.Dispatch<React.SetStateAction<EventInput[]>>) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -79,8 +80,7 @@ const useCalendarEvents = (events: EventInput[], setEvents: React.Dispatch<React
         setEditingEventId(info.event.id);
         setIsEditing(true);
         setIsModalOpen(true);
-        console.log(info.event.extendedProps)
-        console.log(info.event.startStr.slice(0, 16))
+        console.log(info)
         setNewEventData({
             title: info.event.title,
             description: info.event.extendedProps.description || "",
@@ -113,7 +113,26 @@ const useCalendarEvents = (events: EventInput[], setEvents: React.Dispatch<React
     };
 
     const handleEventResizeAndDrop = (info: EventClickArg) => {
-        handlePUTFunctionResizeAndDrop(newEventData, info)
+        previousEventData = events;
+
+        const updatedEventData = {
+            ...newEventData,
+            start: info.event.startStr,
+            end: info.event.endStr,
+            id_event: info.event.extendedProps.id_event
+        };
+
+        console.log(info)
+
+        setEvents((prevEvents) =>
+            prevEvents.map((event) =>
+            event.id === info.event.id ? { ...event, start: info.event.startStr, end: info.event.endStr } : event
+            )
+        );
+
+        setNewEventData(updatedEventData);
+
+        handlePUTFunctionResizeAndDrop(updatedEventData, info);
     };
 
     const handleModifyDataObject = (_dataObject: EventForCalendarEvents) => {
@@ -130,23 +149,24 @@ const useCalendarEvents = (events: EventInput[], setEvents: React.Dispatch<React
         return _formattedDataObject
     }
 
-    const handleSuccessPOST = () => {
+    const handleSuccessPOST = (response: any) => {
         setEvents([...events, { id: Date.now().toString(), ...newEventData }]);
+        console.log(response.event)
+        setNewEventData((prevNewEventData) => ({...prevNewEventData, id_event: response.event.id_event}))
         setIsModalOpen(false);
         setIsEditing(false);
         setEditingEventId(null);
     }
 
     //ARREGLAR NO ESTA FUNCIONANDO CORRECTAMENTE
-    const handleSuccessPUTResizeAndDrop = (info: EventClickArg) => {
-        setEvents((prevEvents) =>
-            prevEvents.map((event) =>
-                event.id === info.event.id ? { ...event, start: info.event.startStr, end: info.event.endStr } : event
-            )
-        );
+    const handleSuccessPUTResizeAndDrop = () => {
         setIsModalOpen(false);
         setIsEditing(false);
         setEditingEventId(null);
+    }
+
+    const handleErrorPUTResizeAndDrop = () => {
+        setEvents(previousEventData)
     }
 
     const handleSuccessPUT = () => {
@@ -175,13 +195,13 @@ const useCalendarEvents = (events: EventInput[], setEvents: React.Dispatch<React
         const _formattedDataObject = handleModifyDataObject(_dataObject)
         console.log(_dataObject)
         const response = await PUTFunction(`/api/events/?event_id=${_dataObject.id_event}`, _formattedDataObject)
-        useAlerts(response, handleSuccessPUTResizeAndDrop(info), handleError)
+        useAlerts(response, handleSuccessPUTResizeAndDrop, handleErrorPUTResizeAndDrop)
     }
 
     const handlePOSTFunction = async (_dataObject: EventForCalendarEvents) => {
         const _formattedDataObject = handleModifyDataObject(_dataObject)
         const response = await POSTFunction(`/api/events`, _formattedDataObject)
-        useAlerts(response, handleSuccessPOST, handleError)
+        useAlerts(response, handleSuccessPOST(response), handleError)
     }
 
     return {
