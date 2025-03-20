@@ -6,7 +6,7 @@ import { QuestionAlert } from "@/components/sweetsAlerts";
 import { useGlobalContext } from "@/context/globalContext";
 import useAlerts from "../useAlerts";
 
-const id_user = parseInt(localStorage.getItem('dataUser') || '')
+const id_user = parseInt(localStorage.getItem('userToken') || '')
 let previousEventData: EventInput[]
 
 const useCalendarEvents = (events: EventInput[], setEvents: React.Dispatch<React.SetStateAction<EventInput[]>>) => {
@@ -173,9 +173,9 @@ const useCalendarEvents = (events: EventInput[], setEvents: React.Dispatch<React
     }
 
     const handleSuccessPOST = (response: any) => {
+        setNewEventData((prevNewEventData) => ({...prevNewEventData, id_event: response.event.id_event}))
         setEvents([...events, { id: Date.now().toString(), ...newEventData }]);
         console.log(response.event)
-        setNewEventData((prevNewEventData) => ({...prevNewEventData, id_event: response.event.id_event}))
         setIsModalOpen(false);
         setIsEditing(false);
         setEditingEventId(null);
@@ -206,14 +206,14 @@ const useCalendarEvents = (events: EventInput[], setEvents: React.Dispatch<React
     const handleDELETEFunction = async (_dataObject: EventForCalendarEvents) => {
         const _formattedDataObject = handleModifyDataObject(_dataObject)
         setSpinner(true)
-        const response = await DELETEFunction(`/api/events/?event_id=${_dataObject.id_event}&?user_id=${id_user}`, _formattedDataObject)
+        const response = await DELETEFunction(`/api/events/?event_id=${_dataObject.id_event}`, _formattedDataObject)
         handleAlerts(response, undefined, undefined)
     }
 
     const handleInvitationDELETEFunction = async (_dataObject: EventForCalendarEvents) => {
         const _formattedDataObject = handleModifyDataObject(_dataObject)
         setSpinner(true)
-        const response = await DELETEFunction(`/api/eventguests/?event_id=${_dataObject.id_event}&?user_id=${id_user}`, _formattedDataObject)
+        const response = await DELETEFunction(`/api/eventguests/?event_id=${_dataObject.id_event}`, _formattedDataObject)
         handleAlerts(response, handleSuccessPUT, handleError)
     }
 

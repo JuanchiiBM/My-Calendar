@@ -1,4 +1,5 @@
 const URLBack = import.meta.env.VITE_URLBack;
+const userToken = localStorage.getItem('userToken');
 
 export const GETFunction = async (endpoint: string) => {
     try {
@@ -6,6 +7,7 @@ export const GETFunction = async (endpoint: string) => {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
+                'Authorization': `Bearer ${userToken}`
             },
         });
         const responseJson = response.json()
@@ -28,6 +30,7 @@ export const POSTFunction = async (endpoint: string, data: any) => {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                'Authorization': `Bearer ${userToken}`
             },
             body: JSON.stringify(data),
         });
@@ -51,6 +54,7 @@ export const PUTFunction = async (endpoint: string, data: any) => {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
+                'Authorization': `Bearer ${userToken}`
             },
             body: JSON.stringify(data),
         });
@@ -74,6 +78,7 @@ export const DELETEFunction = async (endpoint: string, data: any) => {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',
+                'Authorization': `Bearer ${userToken}`
             },
         });
         const responseJson = response.json()

@@ -1,5 +1,6 @@
 import { removeGuestFromEvent } from "../controllers/event.guest.controller.ts";
 import { corsHeaders } from "../deps.ts";
+import { verifyToken } from "../helpers/verifyToken.ts";
 
 export const handleEventGuestRequest = async (
   req: Request,
@@ -11,13 +12,17 @@ export const handleEventGuestRequest = async (
       return new Response(null, { status: 204, headers: corsHeaders });
     }
 
+    const userId = await verifyToken(req);
+    if (!userId) {
+        return new Response(JSON.stringify({ error: "No autorizado" }), { status: 401 });
+    }
+
     //_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-
     // DELETE /api/eventguests
     //_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-
     if (req.method === "DELETE" && url.pathname.startsWith("/api/eventguests/")) {
-      const id_event = Number(req.url.split("?event_id=")[1].split("&")[0]);
-      const id_user = Number(req.url.split("?user_id=")[1]);
-      await removeGuestFromEvent(id_event, id_user);
+      const id_event = Number(req.url.split("?event_id=")[1]);
+      await removeGuestFromEvent(id_event, Number(userId as string));
       return new Response(JSON.stringify({ status: "ok", message: "Invitación eliminada correctamente"}), {
         status: 200,
         headers: corsHeaders,

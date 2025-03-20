@@ -8,26 +8,34 @@ import errors from "@/config/eventModalErrors";
 import useSet from "@/hooks/useSet";
 import { Icon } from "@iconify/react/dist/iconify.js";
 import { CategoryProps } from "@/types/categoryModels";
-
-const id_user = localStorage.getItem('dataUser')
+import { GETFunction } from "@/utils/helpers/httpFunctions";
 
 const EventModal: React.FC<EventModalProps> = ({ isModalOpen, setIsModalOpen, isEditing, newEventData, setNewEventData, handleSaveEvent, handleDeleteEvent, handleDeleteInvitation }) => {
     const { formatDateForPicker } = useFormatDateForPicker()
     const [guest, IsAGuest] = useState(false)
     const categorys: CategoryProps[] = useSet('/api/categorys')
 
-    useEffect(() => {
-        console.log(id_user)
-        if (newEventData.created_by && newEventData.created_by.toString() != id_user?.toString()) {
-            IsAGuest(true)
+    const checkOwner = async () => {
+        if (newEventData.id_event) {
+            const response = await GETFunction(`/api/events/checkOwner/?event_id=${newEventData.id_event}`)
+            if (response.message && response.message.status == 'guest') {
+                IsAGuest(true)
+            } else if (response.message && response.message.status == 'ok') {
+                IsAGuest(false)
+            }
         } else {
             IsAGuest(false)
         }
+    }
+
+
+    useEffect(() => {
+        checkOwner()
     }, [isModalOpen])
 
     return (
         <I18nProvider locale="es">
-            <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+            <Modal isOpen={isModalOpen} onClose={() => {setIsModalOpen(false)}}>
                 <ModalContent>
                     <ModalHeader>{guest ? "Ver Evento" : isEditing ? "Editar Evento" : "Ver Evento"}</ModalHeader>
                     <ModalBody>
@@ -93,7 +101,7 @@ const EventModal: React.FC<EventModalProps> = ({ isModalOpen, setIsModalOpen, is
                     </ModalBody>
                     <ModalFooter>
                         <Button variant="ghost" onPress={() => setIsModalOpen(false)}>Cancelar</Button>
-                        <Button color="secondary" type="submit" form="event-form">{!guest && isEditing ? "Editar" : "Guardar"}</Button>
+                        {!guest && <Button color="secondary" type="submit" form="event-form">{isEditing ? "Editar" : "Guardar"}</Button>}
                         {(!guest && isEditing) ? <Button color="danger" onPress={handleDeleteEvent}>Eliminar</Button> : 
                         (guest && isEditing) && <Button color="danger" onPress={handleDeleteInvitation}>Eliminar Invitación</Button>}
                     </ModalFooter>

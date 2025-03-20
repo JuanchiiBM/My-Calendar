@@ -15,8 +15,10 @@ const useHandleSubmit = () => {
             ErrorAlert(title.error, response.error);
         } else if (response.status == 'ok') {
             if (response.user) {
-                localStorage.removeItem('dataUser');
-                localStorage.setItem('dataUser', response.user.id_user)
+                localStorage.removeItem('userToken')
+                localStorage.removeItem('userName')
+                localStorage.setItem('userToken', response.user.userToken)
+                localStorage.setItem('userName', response.user.name)
             }
             SuccessAlert(title.success, response.message, undefined, callback);
         } else {

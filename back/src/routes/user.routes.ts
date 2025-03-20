@@ -77,15 +77,16 @@ export const handleUserRequest = async (req: Request): Promise<Response> => {
         });
       }
 
-      if (userExist && data.password == userExist.password) {
-        return new Response(JSON.stringify({ user: userExist, message: "Inicio de sesión exitoso", status: 'ok' }), {
+      const userLogin = await loginUser(data.name, data.password);
+      if (userLogin) {
+        return new Response(JSON.stringify({ user: userLogin, message: "Inicio de sesión exitoso", status: 'ok' }), {
           status: 201,
           headers: corsHeaders,
         });
       }
 
       const user = await createUser(data.name, data.password);
-      return new Response(JSON.stringify({ user: userExist, message: "Creación de usuario exitosa", status: 'ok' }), {
+      return new Response(JSON.stringify({ user: user, message: "Creación de usuario exitosa", status: 'ok' }), {
         status: 201,
         headers: corsHeaders,
       });

@@ -14,9 +14,9 @@ import useThemeToggle from "@/hooks/useThemeToggle";
 import { EventInput } from "@fullcalendar/core/index.js";
 import useSetEvents from "@/hooks/calendar/useSetEvents";
 import { useGlobalContext } from "@/context/globalContext";
-import SpinnerComponent from "@/components/Spinner";
+import SpinnerComponent from "@/components/spinner";
 
-const id_user = localStorage.getItem('dataUser')
+const id_user = localStorage.getItem('userToken')
 
 /*
     - Arreglar que al crear un evento, no puedo eliminarlo ni editarlo sin recargar la pagina

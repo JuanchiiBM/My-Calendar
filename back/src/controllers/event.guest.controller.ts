@@ -45,6 +45,7 @@ export const addGuestToEvent = async (event_id: number,user_id: number): Promise
 
 export const removeGuestFromEvent = async (event_id: number, user_id: number): Promise<{ message: string }> => {
   try {
+    console.log(event_id, user_id);
     // 🔹 Verificar si el evento existe
     const eventCheck = await client.queryObject<{ id_event: number }>(
       `SELECT id_event FROM "Event" WHERE id_event = $1`,

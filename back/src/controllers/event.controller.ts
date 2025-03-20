@@ -118,6 +118,7 @@ export const createEvent = async (
 export const updateEvent = async (
   event_id: number,
   updatedData: Partial<EventProps>,
+  id_user: string,
   guests?: string[],
 ): Promise<{ message: string }> => {
   try {
@@ -133,7 +134,7 @@ export const updateEvent = async (
     // 🔹 Verificar si el editor es uno mismo
     const editorCheck = await client.queryObject<{ id_event: number }>(
       `SELECT created_by, id_event FROM "Event" WHERE id_event = $1 AND created_by = $2`,
-      [event_id, updatedData.id_user],
+      [event_id, id_user],
     );
     if (editorCheck.rows.length === 0) {
       throw new Error("Usted no posee permisos para editar este evento.");
@@ -219,9 +220,29 @@ export const deleteEvent = async (
     );
 
     return { message: "Evento eliminado correctamente." };
-
   } catch (error: any) {
     console.error("Error eliminando evento", error);
     throw new Error(error.message);
+  }
+};
+
+export const checkOwnerOfEvent = async (
+  id_event: string,
+  id_user: string,
+): Promise<{ status: string }> => {
+  try {
+    // 🔹 Verificar si el editor es uno mismo
+    const editorCheck = await client.queryObject<{ id_event: number }>(
+      `SELECT created_by, id_event FROM "Event" WHERE id_event = $1 AND created_by = $2`,
+      [id_event, id_user],
+    );
+    if (editorCheck.rows.length === 0) {
+      return { status: "guest" };
+    }
+
+    return { status: "ok"}
+  } catch (error) {
+    console.error("Error obteniendo eventos", error);
+    throw new Error("Error al obtener eventos");
   }
 };

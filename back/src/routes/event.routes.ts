@@ -1,4 +1,5 @@
 import {
+checkOwnerOfEvent,
   createEvent,
   deleteEvent,
   getEvents,
@@ -7,6 +8,7 @@ import {
 } from "../controllers/event.controller.ts";
 import { corsHeaders } from "../deps.ts";
 import { errorGuestHandler } from "../helpers/errorGuestsHandler.ts";
+import { verifyToken } from "../helpers/verifyToken.ts";
 
 export const handleEventRequest = async (req: Request): Promise<Response> => {
   try {
@@ -16,12 +18,43 @@ export const handleEventRequest = async (req: Request): Promise<Response> => {
       return new Response(null, { status: 204, headers: corsHeaders });
     }
 
+    const userId = await verifyToken(req);
+    if (!userId) {
+      return new Response(JSON.stringify({ error: "No autorizado" }), {
+        status: 401,
+      });
+    }
+    
+    //_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-
+    // GET /api/events/checkOwner
+    //_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-
+    if (req.method === "GET" && url.pathname.startsWith("/api/events/checkOwner/")) {
+        const event_id = Number(req.url.split("?event_id=")[1]);
+
+        if (!event_id || isNaN(event_id)) {
+            return new Response(
+              JSON.stringify({ error: "ID de evento inválido" }),
+              {
+                status: 400,
+                headers: corsHeaders,
+              },
+            );
+        }
+        const message = await checkOwnerOfEvent(event_id.toString(), userId as string);
+        return new Response(
+          JSON.stringify({ message }),
+          {
+            status: 200,
+            headers: corsHeaders,
+          },
+        );
+    }
+
     //_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-
     // GET /api/events?id
     //_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-
     if (req.method === "GET" && url.pathname.startsWith("/api/events/")) {
-      const id_user = req.url.split("?id=")[1];
-      const events = await getEventsById(id_user);
+      const events = await getEventsById(userId as string);
       return new Response(JSON.stringify(events), {
         status: 200,
         headers: corsHeaders,
@@ -48,7 +81,7 @@ export const handleEventRequest = async (req: Request): Promise<Response> => {
       // 🔹 Validar datos requeridos
       if (
         !data.title || !data.start_date || !data.end_date ||
-        !data.category_id || !data.created_by
+        !data.category_id
       ) {
         return new Response(
           JSON.stringify({ error: "Faltan datos obligatorios" }),
@@ -70,7 +103,7 @@ export const handleEventRequest = async (req: Request): Promise<Response> => {
         data.start_date,
         data.end_date,
         data.category_id,
-        data.created_by,
+        Number(userId as string),
         guests,
       );
 
@@ -105,18 +138,11 @@ export const handleEventRequest = async (req: Request): Promise<Response> => {
         );
       }
 
-      if (!data.created_by) {
-        return new Response(JSON.stringify({ error: "Se requiere user_id" }), {
-          status: 400,
-          headers: corsHeaders,
-        });
-      }
-
       // 🔹 guests es opcional -> Convertimos nombres en IDs si existen
       const guests: number[] = [];
       await errorGuestHandler(data, guests);
 
-      const _result = await updateEvent(event_id, data, data.guests);
+      const _result = await updateEvent(event_id, data, userId as string, data.guests);
 
       return new Response(
         JSON.stringify({ status: "ok", message: "Evento actualizado" }),
@@ -131,14 +157,15 @@ export const handleEventRequest = async (req: Request): Promise<Response> => {
     // DELETE /api/eventguests
     //_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-
     if (req.method === "DELETE" && url.pathname.startsWith("/api/events/")) {
-      const event_id = Number(req.url.split("?event_id=")[1].split("&")[0]);
-      const user_id = Number(req.url.split("?user_id=")[1]);
-
-      await deleteEvent(event_id, user_id);
-      return new Response(JSON.stringify({ status: "ok", message: "Evento eliminado correctamente"}), {
-        status: 200,
-        headers: corsHeaders,
-      });
+      const event_id = Number(req.url.split("?event_id=")[1])
+      await deleteEvent(event_id, Number(userId as string));
+      return new Response(
+        JSON.stringify({ status: "ok", message: "Evento eliminado" }),
+        {
+          status: 200,
+          headers: corsHeaders,
+        },
+      );
     }
 
     //_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-

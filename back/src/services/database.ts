@@ -1,11 +1,12 @@
 import { Client } from "../deps.ts";
 
+
 const client = new Client({
-  user: Deno.env.get("DB_USER") ?? "postgres",
-  password: Deno.env.get("DB_PASSWORD") ?? "Philipso1965!",
-  database: Deno.env.get("DB_NAME") ?? "calendar_db",
-  hostname: Deno.env.get("DB_HOST") ?? "localhost",
-  port: Number(Deno.env.get("DB_PORT")) ?? 5432,
+  user: Deno.env.get("DB_USER"),
+  password: Deno.env.get("DB_PASSWORD"),
+  database: Deno.env.get("DB_NAME"),
+  hostname: Deno.env.get("DB_HOST"),
+  port: Number(Deno.env.get("DB_PORT")),
 });
 
 export const connectDB = async () => {
