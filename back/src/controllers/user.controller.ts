@@ -30,7 +30,7 @@ export const getUserByName = async (name: string): Promise<UserProps | null> => 
 export const getUserById = async (id: string): Promise<UserProps | null> => {
     try {
         const result = await client.queryObject<UserProps>(
-            `SELECT * FROM "User" WHERE TRIM(id_user) = $1 LIMIT 1`,
+            `SELECT * FROM "User" WHERE id_user = $1 LIMIT 1`,
             [id]
         );
         return result.rows.length > 0 ? result.rows[0] : null;
@@ -40,7 +40,7 @@ export const getUserById = async (id: string): Promise<UserProps | null> => {
     }
 };
 
-export const createUser = async (name: string, password: string): Promise<any> => {
+export const createUser = async (name: string, password: string): Promise<{ name: string, userToken: string}> => {
     try {
         const result = await client.queryArray<[number]>(
             `SELECT ensure_user_exists('${name}', '${password}')`
@@ -59,7 +59,7 @@ export const createUser = async (name: string, password: string): Promise<any> =
     }
 };
 
-export const loginUser = async (name: string, password: string): Promise<any> => {
+export const loginUser = async (name: string, password: string): Promise<{ name: string, userToken: string}> => {
     try {
         const result = await client.queryObject<UserProps>(
             `SELECT * FROM "User" WHERE name = $1 AND password = $2 LIMIT 1`,

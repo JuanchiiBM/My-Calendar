@@ -6,6 +6,7 @@ import {
 } from "./event.guest.controller.ts";
 import { getUserByName } from "./user.controller.ts";
 import { getIdGuests } from "../helpers/getIdGuests.ts";
+import { ResponseProps } from "../models/success.model.ts";
 
 export const getEvents = async (): Promise<EventProps[]> => {
   try {
@@ -120,7 +121,7 @@ export const updateEvent = async (
   updatedData: Partial<EventProps>,
   id_user: string,
   guests?: string[],
-): Promise<{ message: string }> => {
+): Promise<ResponseProps> => {
   try {
     // 🔹 Verificar si el evento existe
     const eventCheck = await client.queryObject<{ id_event: number }>(
@@ -184,7 +185,7 @@ export const updateEvent = async (
       }
     }
 
-    return { message: "Evento actualizado correctamente." };
+    return { status: 'ok', message: "Evento actualizado correctamente." };
   } catch (error: any) {
     console.error("Error actualizando evento", error);
     throw new Error(`${error.message}`);
@@ -194,7 +195,7 @@ export const updateEvent = async (
 export const deleteEvent = async (
   id_event: number,
   id_user: number,
-): Promise<{ message: string }> => {
+): Promise<ResponseProps> => {
   try {
     // 🔹 Verificar si el evento existe
     const eventCheck = await client.queryObject<{ id_event: number }>(
@@ -219,7 +220,7 @@ export const deleteEvent = async (
       [id_event],
     );
 
-    return { message: "Evento eliminado correctamente." };
+    return { status: 'ok', message: "Evento eliminado correctamente." };
   } catch (error: any) {
     console.error("Error eliminando evento", error);
     throw new Error(error.message);
@@ -229,7 +230,7 @@ export const deleteEvent = async (
 export const checkOwnerOfEvent = async (
   id_event: string,
   id_user: string,
-): Promise<{ status: string }> => {
+): Promise<ResponseProps> => {
   try {
     // 🔹 Verificar si el editor es uno mismo
     const editorCheck = await client.queryObject<{ id_event: number }>(

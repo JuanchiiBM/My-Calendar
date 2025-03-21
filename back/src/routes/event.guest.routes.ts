@@ -22,8 +22,8 @@ export const handleEventGuestRequest = async (
     //_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-
     if (req.method === "DELETE" && url.pathname.startsWith("/api/eventguests/")) {
       const id_event = Number(req.url.split("?event_id=")[1]);
-      await removeGuestFromEvent(id_event, Number(userId as string));
-      return new Response(JSON.stringify({ status: "ok", message: "Invitación eliminada correctamente"}), {
+      const response = await removeGuestFromEvent(id_event, Number(userId as string));
+      return new Response(JSON.stringify(response), {
         status: 200,
         headers: corsHeaders,
       });

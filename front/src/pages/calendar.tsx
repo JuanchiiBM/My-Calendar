@@ -6,7 +6,7 @@ import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import esLocale from "@fullcalendar/core/locales/es";
 import { Icon } from "@iconify/react";
-import { Button } from "@heroui/react";
+import { Badge, Button } from "@heroui/react";
 import EventModal from "@/components/calendar/eventModal";
 import useCalendarEvents from "@/hooks/calendar/useCalendarEvents";
 import useIconButtons from "@/hooks/calendar/useIconButtons";
@@ -15,15 +15,14 @@ import { EventInput } from "@fullcalendar/core/index.js";
 import useSetEvents from "@/hooks/calendar/useSetEvents";
 import { useGlobalContext } from "@/context/globalContext";
 import SpinnerComponent from "@/components/spinner";
+import Notifications from "@/components/calendar/notifications";
+import useLogout from "@/hooks/useLogout";
 
 const id_user = localStorage.getItem('userToken')
 
-/*
-    - Arreglar que al crear un evento, no puedo eliminarlo ni editarlo sin recargar la pagina
-*/
-
 const Calendar = () => {
     const { theme, toggleTheme } = useThemeToggle();
+    const { logout } = useLogout();
     const { spinner } = useGlobalContext()
     const [events, setEvents] = useState<EventInput[]>([]);
 
@@ -50,9 +49,15 @@ const Calendar = () => {
     return (
         <main className="bg-background w-full flex flex-col min-h-screen items-center justify-center p-4">
             {spinner && <SpinnerComponent />}
-            <Button isIconOnly variant="light" className="absolute right-2 top-2" onPress={toggleTheme}>
+            <nav className="absolute flex items-end justify-end top-2 w-full">
+            <Notifications />
+            <Button isIconOnly variant="light" className="" onPress={toggleTheme}>
                 <Icon icon={theme === "light" ? "lucide:moon" : "lucide:sun"} width={20} />
             </Button>
+            <Button isIconOnly variant="light" className="" onPress={logout}>
+                <Icon icon="fluent:arrow-exit-20-filled" width={20} />
+            </Button>
+            </nav>
             <h1 className="text-2xl font-bold mb-4">Mi Agenda</h1>
             <div className="w-[80%] min-h-screen">
                 <FullCalendar

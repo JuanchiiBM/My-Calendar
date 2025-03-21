@@ -1,7 +1,7 @@
+import { ResponseProps } from "../models/success.model.ts";
 import client from "../services/database.ts";
-import { EventGuestProps } from "../models/event.guest.model.ts";
 
-export const addGuestToEvent = async (event_id: number,user_id: number): Promise<{ message: string }> => {
+export const addGuestToEvent = async (event_id: number,user_id: number): Promise<ResponseProps> => {
   try {
     // 🔹 Verificar si el evento existe
     const eventCheck = await client.queryObject<{ id_event: number }>(
@@ -43,7 +43,7 @@ export const addGuestToEvent = async (event_id: number,user_id: number): Promise
   }
 };
 
-export const removeGuestFromEvent = async (event_id: number, user_id: number): Promise<{ message: string }> => {
+export const removeGuestFromEvent = async (event_id: number, user_id: number): Promise<ResponseProps> => {
   try {
     console.log(event_id, user_id);
     // 🔹 Verificar si el evento existe
@@ -70,7 +70,7 @@ export const removeGuestFromEvent = async (event_id: number, user_id: number): P
       [event_id, user_id]
     );
 
-    return { message: "Invitado eliminado exitosamente." };
+    return { status: 'ok', message: "Invitación eliminada." };
   } catch (error: any) {
     console.error("Error eliminando invitado", error);
     throw new Error(`${error.message}`);

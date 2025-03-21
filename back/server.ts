@@ -1,6 +1,7 @@
 import { handleUserRequest } from "./src/routes/user.routes.ts";
 import { handleCategoryRequest } from "./src/routes/category.routes.ts";
 import { handleEventRequest } from "./src/routes/event.routes.ts";
+import { handleNotificationRequest } from "./src/routes/notification.routes.ts";
 import { handleEventGuestRequest } from "./src/routes/event.guest.routes.ts";
 import { connectDB } from "./src/services/database.ts";
 
@@ -25,6 +26,11 @@ const handleRequest = async (req: Request): Promise<Response> => {
   // 🔹 Rutas de eventos de invitados
   if (url.pathname.startsWith("/api/eventguests")) {
     return handleEventGuestRequest(req);
+  }
+
+  // 🔹 Rutas de notificaciones
+  if (url.pathname.startsWith("/api/notifications")) {
+    return handleNotificationRequest(req);
   }
 
   // 🔹 Rutas de categorías
