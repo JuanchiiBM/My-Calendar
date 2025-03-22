@@ -7,6 +7,7 @@ import { useGlobalContext } from "@/context/globalContext";
 import useAlerts from "../useAlerts";
 
 const id_user = parseInt(localStorage.getItem('userToken') || '')
+const name_user = localStorage.getItem('userName')
 let previousEventData: EventInput[]
 
 const useCalendarEvents = (events: EventInput[], setEvents: React.Dispatch<React.SetStateAction<EventInput[]>>) => {
@@ -105,6 +106,16 @@ const useCalendarEvents = (events: EventInput[], setEvents: React.Dispatch<React
                 setIsModalOpen(false);
                 setIsEditing(false);
                 setEditingEventId(null);
+
+                const eventoEliminado = {
+                    id_notification: newEventData.id_event,
+                    name_of_guests: newEventData.name_invited_user,
+                    created_at: new Date().toISOString(),
+                    title: 'Evento Cancelado',
+                    message: `El evento ${newEventData.title} ha sido cancelado`,
+                    saw: false
+                }
+                POSTFunction(`/api/notifications`, eventoEliminado)
                 handleDELETEFunction(newEventData)
             }
         })
@@ -118,6 +129,15 @@ const useCalendarEvents = (events: EventInput[], setEvents: React.Dispatch<React
                 setIsEditing(false);
                 setEditingEventId(null);
                 handleInvitationDELETEFunction(newEventData)
+                const eventoDeclinado = {
+                    id_notification: newEventData.id_event,
+                    id_destination: newEventData.created_by,
+                    created_at: new Date().toISOString(),
+                    title: 'Evento Declinado',
+                    message: `${name_user} ha declinado la invitación al evento ${newEventData.title}`,
+                    saw: false
+                }
+                POSTFunction(`/api/notifications`, eventoDeclinado)
             }
         })
     }
@@ -126,6 +146,15 @@ const useCalendarEvents = (events: EventInput[], setEvents: React.Dispatch<React
         if (isEditing && editingEventId) {
             handlePUTFunction(newEventData)
         } else {
+            const eventoCreado = {
+                id_notification: newEventData.id_event,
+                name_of_guests: newEventData.name_invited_user,
+                created_at: new Date().toISOString(),
+                title: 'Ha sido invitado a un evento',
+                message: `Usted ha sido invitado al evento ${newEventData.title} creado por ${name_user}`,
+                saw: false
+            }
+            POSTFunction(`/api/notifications`, eventoCreado)
             handlePOSTFunction(newEventData)
         }
     };
@@ -181,7 +210,7 @@ const useCalendarEvents = (events: EventInput[], setEvents: React.Dispatch<React
         setEditingEventId(null);
     }
 
-    //ARREGLAR NO ESTA FUNCIONANDO CORRECTAMENTE
+
     const handleSuccessPUTResizeAndDrop = () => {
         setIsModalOpen(false);
         setIsEditing(false);

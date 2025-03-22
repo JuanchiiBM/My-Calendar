@@ -19,6 +19,9 @@ import Notifications from "@/components/calendar/notifications";
 import useLogout from "@/hooks/useLogout";
 
 const id_user = localStorage.getItem('userToken')
+const name_user = localStorage.getItem('userName')
+
+// Eliminar evento luego de crearlo
 
 const Calendar = () => {
     const { theme, toggleTheme } = useThemeToggle();
@@ -58,7 +61,7 @@ const Calendar = () => {
                 <Icon icon="fluent:arrow-exit-20-filled" width={20} />
             </Button>
             </nav>
-            <h1 className="text-2xl font-bold mb-4">Mi Agenda</h1>
+            <h1 className="text-2xl font-bold mb-4">Agenda de {name_user}</h1>
             <div className="w-[80%] min-h-screen">
                 <FullCalendar
                     plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin]}

@@ -4,9 +4,12 @@ import { handleEventRequest } from "./src/routes/event.routes.ts";
 import { handleNotificationRequest } from "./src/routes/notification.routes.ts";
 import { handleEventGuestRequest } from "./src/routes/event.guest.routes.ts";
 import { connectDB } from "./src/services/database.ts";
+import { startWebSocketServer } from "./src/services/websocket.ts";
 
 // Conectar a la base de datos
 await connectDB();
+startWebSocketServer();
+
 
 console.log("🚀 Servidor corriendo en http://localhost:8000");
 
