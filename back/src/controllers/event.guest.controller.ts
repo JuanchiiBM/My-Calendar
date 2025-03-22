@@ -60,6 +60,7 @@ export const removeGuestFromEvent = async (event_id: number, user_id: number): P
       `SELECT user_id FROM "EventGuest" WHERE event_id = $1 AND user_id = $2`,
       [event_id, user_id]
     );
+    
     if (guestCheck.rows.length === 0) {
       throw new Error("El usuario no está invitado a este evento.");
     }

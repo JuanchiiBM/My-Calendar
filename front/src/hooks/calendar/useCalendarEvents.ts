@@ -107,15 +107,17 @@ const useCalendarEvents = (events: EventInput[], setEvents: React.Dispatch<React
                 setIsEditing(false);
                 setEditingEventId(null);
 
-                const eventoEliminado = {
-                    id_notification: newEventData.id_event,
-                    name_of_guests: newEventData.name_invited_user,
-                    created_at: new Date().toISOString(),
-                    title: 'Evento Cancelado',
-                    message: `El evento ${newEventData.title} ha sido cancelado`,
-                    saw: false
+                if (newEventData.name_invited_user) {
+                    const eventoEliminado = {
+                        id_notification: newEventData.id_event,
+                        name_of_guests: newEventData.name_invited_user,
+                        created_at: new Date().toISOString(),
+                        title: 'Evento Cancelado',
+                        message: `El evento ${newEventData.title} ha sido cancelado`,
+                        saw: false
+                    }
+                    POSTFunction(`/api/notifications`, eventoEliminado)
                 }
-                POSTFunction(`/api/notifications`, eventoEliminado)
                 handleDELETEFunction(newEventData)
             }
         })
@@ -144,17 +146,30 @@ const useCalendarEvents = (events: EventInput[], setEvents: React.Dispatch<React
 
     const handleSaveEvent = () => {
         if (isEditing && editingEventId) {
+            if (newEventData.name_invited_user) {
+                const eventoModificado = {
+                    id_notification: newEventData.id_event,
+                    name_of_guests: newEventData.name_invited_user,
+                    created_at: new Date().toISOString(),
+                    title: 'Evento Modificado',
+                    message: `El evento ${newEventData.title} ha sido modificado por ${name_user}. el horario es de ${newEventData.start} a ${newEventData.end}`,
+                    saw: false
+                }
+                POSTFunction(`/api/notifications`, eventoModificado)
+            }
             handlePUTFunction(newEventData)
         } else {
-            const eventoCreado = {
-                id_notification: newEventData.id_event,
-                name_of_guests: newEventData.name_invited_user,
-                created_at: new Date().toISOString(),
-                title: 'Ha sido invitado a un evento',
-                message: `Usted ha sido invitado al evento ${newEventData.title} creado por ${name_user}`,
-                saw: false
+            if (newEventData.name_invited_user) {
+                const eventoCreado = {
+                    id_notification: newEventData.id_event,
+                    name_of_guests: newEventData.name_invited_user,
+                    created_at: new Date().toISOString(),
+                    title: 'Ha sido invitado a un evento',
+                    message: `Usted ha sido invitado al evento ${newEventData.title} creado por ${name_user}`,
+                    saw: false
+                }
+                POSTFunction(`/api/notifications`, eventoCreado)
             }
-            POSTFunction(`/api/notifications`, eventoCreado)
             handlePOSTFunction(newEventData)
         }
     };

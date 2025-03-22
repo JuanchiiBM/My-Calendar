@@ -26,7 +26,7 @@ const Notifications = () => {
       // 🎧 Escuchamos WebSocket
       useWebSocket(userId as number, (newNotification: NotificationProps) => {
         setNotifications((prev) => [newNotification, ...prev]);
-      });
+    });
     
 
     const handleModal = (notification: NotificationProps) => {

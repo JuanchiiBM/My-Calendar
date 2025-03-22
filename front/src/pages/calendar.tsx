@@ -6,7 +6,7 @@ import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import esLocale from "@fullcalendar/core/locales/es";
 import { Icon } from "@iconify/react";
-import { Badge, Button } from "@heroui/react";
+import { Button } from "@heroui/react";
 import EventModal from "@/components/calendar/eventModal";
 import useCalendarEvents from "@/hooks/calendar/useCalendarEvents";
 import useIconButtons from "@/hooks/calendar/useIconButtons";
@@ -22,6 +22,7 @@ const id_user = localStorage.getItem('userToken')
 const name_user = localStorage.getItem('userName')
 
 // Eliminar evento luego de crearlo
+// Editar evento luego de crearlo
 
 const Calendar = () => {
     const { theme, toggleTheme } = useThemeToggle();
@@ -50,7 +51,7 @@ const Calendar = () => {
     useIconButtons();
 
     return (
-        <main className="bg-background w-full flex flex-col min-h-screen items-center justify-center p-4">
+        <main className="bg-background w-full flex flex-col min-h-screen items-center justify-center">
             {spinner && <SpinnerComponent />}
             <nav className="absolute flex items-end justify-end top-2 w-full">
             <Notifications />
@@ -61,16 +62,35 @@ const Calendar = () => {
                 <Icon icon="fluent:arrow-exit-20-filled" width={20} />
             </Button>
             </nav>
-            <h1 className="text-2xl font-bold mb-4">Agenda de {name_user}</h1>
-            <div className="w-[80%] min-h-screen">
+            <h1 className="text-2xl sm:mt-0 mt-[100px] font-bold mb-4">Agenda de {name_user}</h1>
+            <div className="w-full sm:w-[80%] min-h-screen">
                 <FullCalendar
                     plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin]}
                     initialView="dayGridMonth"
-                    headerToolbar={{
-                        left: "prev,next",
-                        center: "title",
-                        right: "addEventButton,dayGridMonth,timeGridWeek,timeGridDay,listWeek",
-                    }}
+                    headerToolbar={
+                        window.innerWidth < 768
+                            ? {
+                                left: "",
+                                center: "title",
+                                right: "",
+                            }
+                            : {
+                                left: "prev,next",
+                                center: "title",
+                                right: "addEventButton,dayGridMonth,timeGridWeek,timeGridDay,listWeek",
+                            }
+                    }
+
+                    footerToolbar={
+                        window.innerWidth < 768
+                        ? {
+                            left: "prev,next",
+                            center: "",
+                            right: "addEventButton,dayGridMonth,timeGridWeek,timeGridDay,listWeek",
+                        }
+                        : {}
+                    }
+                    
                     customButtons={{
                         addEventButton: {
                             text: "",

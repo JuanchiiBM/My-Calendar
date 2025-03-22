@@ -4,7 +4,6 @@ import {
   addGuestToEvent,
   removeGuestFromEvent,
 } from "./event.guest.controller.ts";
-import { getUserByName } from "./user.controller.ts";
 import { getIdGuests } from "../helpers/getIdGuests.ts";
 import { ResponseProps } from "../models/success.model.ts";
 
