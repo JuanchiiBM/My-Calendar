@@ -92,7 +92,7 @@ const useCalendarEvents = (events: EventInput[], setEvents: React.Dispatch<React
             start: info.event.startStr.slice(0, 16),
             end: info.event.endStr.slice(0, 16),
             color: info.event.backgroundColor,
-            id_event: info.event.extendedProps.id_event,
+            id_event: info.event.extendedProps.id_event ? info.event.extendedProps.id_event : newEventData.id_event,
             category_id: info.event.extendedProps.category_id,
             created_by: info.event.extendedProps.created_by,
             name_invited_user: info.event.extendedProps.name_invited_user
@@ -106,6 +106,7 @@ const useCalendarEvents = (events: EventInput[], setEvents: React.Dispatch<React
                 setIsModalOpen(false);
                 setIsEditing(false);
                 setEditingEventId(null);
+                setNewEventData((prevNewEventData) => ({...prevNewEventData, id_event: newEventData.id_event}))
 
                 if (newEventData.name_invited_user) {
                     const eventoEliminado = {

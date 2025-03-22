@@ -21,9 +21,6 @@ import useLogout from "@/hooks/useLogout";
 const id_user = localStorage.getItem('userToken')
 const name_user = localStorage.getItem('userName')
 
-// Eliminar evento luego de crearlo
-// Editar evento luego de crearlo
-
 const Calendar = () => {
     const { theme, toggleTheme } = useThemeToggle();
     const { logout } = useLogout();
